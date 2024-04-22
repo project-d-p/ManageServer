@@ -1,12 +1,25 @@
-### 4.22
+# Game Lobby Server
 
-- API 통신을 위한 Controller 및 HostBuilder 추가
-    - /Controller/MatchingController
-        - 현재 호출 시, 바로 Grpc 통신으로 연결.
-        추후, 대기열 & 매칭 로직 추가 필요
-        - 통신 응답 반환(IP & Port)
-- Grpc를 통해 다른 서버와 통신하는 부분 추가
-    - proto 추가
-        - /Protos/matching
-    - Grpc.Tools을 통해 proto 컴파일
-    - MatchingController에 임시 구현
+This repository contains the server-side implementation for a game lobby system, built with C# and .NET. It utilizes gRPC and Protocol Buffers for server communication and interacts with game engine clients using .NET's built-in API.
+
+## Technology Stack
+
+- **C# & .NET**: Core technologies used for server-side logic.
+- **gRPC & Protocol Buffers**: Used for efficient, high-performance server-to-server communication.
+- **.NET API**: Manages communication between the server and game engine clients.
+
+## Purpose
+
+The purpose of this server is to handle all necessary functionalities within the game lobby, including player matchmaking, game session management, and player statistics updates.
+
+## Current Features
+
+- **Player Matchmaking System**: Currently implementing a system to match players in the lobby based on various criteria such as skill levels and game preferences.
+
+## How to Run
+
+To run this project, you will need .NET SDK installed on your machine. After cloning the repository, navigate to the project directory and run the following commands:
+
+```bash
+dotnet build
+dotnet run
