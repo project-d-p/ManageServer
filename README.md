@@ -1,4 +1,4 @@
-# Game Lobby Server
+# Game Manage Server
 
 This repository contains the server-side implementation for a game lobby system, built with C# and .NET. It utilizes gRPC and Protocol Buffers for server communication and interacts with game engine clients using .NET's built-in API.
 
@@ -14,7 +14,7 @@ The purpose of this server is to handle all necessary functionalities within the
 
 ## Current Features
 
-- **Player Matchmaking System**: Currently implementing a system to match players in the lobby based on various criteria such as skill levels and game preferences.
+- **Player Matchmaking System**
 
 ## How to Run
 
