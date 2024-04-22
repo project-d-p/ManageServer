@@ -16,6 +16,10 @@ The purpose of this server is to handle all necessary functionalities within the
 
 - **Player Matchmaking System**
 
+## Project Progress
+
+For detailed information on the project's progress, enhancements, and versioning, please refer to our [Project Wiki](https://github.com/project-d-p/ManageServer/wiki).
+
 ## How to Run
 
 To run this project, you will need .NET SDK installed on your machine. After cloning the repository, navigate to the project directory and run the following commands:
