@@ -1,5 +1,8 @@
-public class Team
+namespace MatchingClient.Models
 {
-    public int TeamId { get; set; }
-    public List<Player> Players { get; set; }
+    public class Team
+    {
+        public int TeamId { get; set; }
+        public List<Player> Players { get; set; }
+    }
 }

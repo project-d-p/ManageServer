@@ -1,29 +1,38 @@
 using Microsoft.AspNetCore.Mvc;
-using System.Threading.Tasks;
 using Grpc.Net.Client;
 using Matching;
 
-[ApiController]
-[Route("[controller]")]
-public class MatchingController : ControllerBase
+namespace MatchingClient.Controllers
 {
-    [HttpPost("match")]
-    public async Task<IActionResult> MatchPlayers()
+    [ApiController]
+    [Route("[controller]")]
+    public class MatchingController : ControllerBase
     {
-        using var channel = GrpcChannel.ForAddress("http://localhost:5255");
-        var client = new MatchingService.MatchingServiceClient(channel);
+        [HttpPost("match")]
+        public async Task<IActionResult> MatchPlayers()
+        {
+            var response = await RequestTeamMatch(new string[] { "player1", "player2" });
 
-        var teamPlayers = new TeamPlayers();
-        teamPlayers.PlayerIds.Add("player1");
-        teamPlayers.PlayerIds.Add("player2");
+            return Ok(new {
+                UdpIp = response.UdpIp,
+                UdpPort = response.UdpPort,
+                TcpIp = response.TcpIp,
+                TcpPort = response.TcpPort
+            });
+        }
 
-        var response = await client.SendTeamPlayersAsync(teamPlayers);
-        
-        return Ok(new {
-            UdpIp = response.UdpIp,
-            UdpPort = response.UdpPort,
-            TcpIp = response.TcpIp,
-            TcpPort = response.TcpPort
-        });
+        private async Task<TeamMatchResponse> RequestTeamMatch(string[] playerIds)
+        {
+            using var channel = GrpcChannel.ForAddress("http://localhost:5255");
+            var client = new MatchingService.MatchingServiceClient(channel);
+
+            var teamPlayers = new TeamPlayers();
+            foreach (var playerId in playerIds)
+            {
+                teamPlayers.PlayerIds.Add(playerId);
+            }
+
+            return await client.SendTeamPlayersAsync(teamPlayers);
+        }
     }
 }

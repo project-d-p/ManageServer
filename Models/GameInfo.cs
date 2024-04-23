@@ -1,6 +1,9 @@
-public class GameInfo
+namespace MatchingClient.Models
 {
-    public string ServerIP { get; set; }
-    public int UDPPort { get; set; }
-    public int TCPPort { get; set; }
+    public class GameInfo
+    {
+        public string ServerIP { get; set; }
+        public int UDPPort { get; set; }
+        public int TCPPort { get; set; }
+    }
 }
