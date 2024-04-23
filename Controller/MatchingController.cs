@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
+using System.Threading.Tasks;
 using Grpc.Net.Client;
 using Matching;
+using MatchingClient.Models;
 
 namespace MatchingClient.Controllers
 {
@@ -14,14 +16,14 @@ namespace MatchingClient.Controllers
             var response = await RequestTeamMatch(new string[] { "player1", "player2" });
 
             return Ok(new {
-                UdpIp = response.UdpIp,
-                UdpPort = response.UdpPort,
-                TcpIp = response.TcpIp,
-                TcpPort = response.TcpPort
+                UdpIp = response.UDPIP,
+                UdpPort = response.UDPPort,
+                TcpIp = response.TCPIP,
+                TcpPort = response.UDPPort
             });
         }
 
-        private async Task<TeamMatchResponse> RequestTeamMatch(string[] playerIds)
+        private async Task<GameInfo> RequestTeamMatch(string[] playerIds)
         {
             using var channel = GrpcChannel.ForAddress("http://localhost:5255");
             var client = new MatchingService.MatchingServiceClient(channel);
@@ -31,8 +33,16 @@ namespace MatchingClient.Controllers
             {
                 teamPlayers.PlayerIds.Add(playerId);
             }
+            var response = await client.SendTeamPlayersAsync(teamPlayers);
+            GameInfo gameInfo = new GameInfo
+            {
+                UDPIP = response.UdpIp,
+                TCPIP = response.TcpIp,
+                UDPPort = response.UdpPort,
+                TCPPort = response.TcpPort
+            };
 
-            return await client.SendTeamPlayersAsync(teamPlayers);
+            return gameInfo;
         }
     }
 }

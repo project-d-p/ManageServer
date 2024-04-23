@@ -18,3 +18,4 @@
 /Users/joupark/DirForClone/testGameServer/MatchingClient/obj/Debug/net8.0/MatchingClient.pdb
 /Users/joupark/DirForClone/testGameServer/MatchingClient/obj/Debug/net8.0/MatchingClient.genruntimeconfig.cache
 /Users/joupark/DirForClone/testGameServer/MatchingClient/obj/Debug/net8.0/ref/MatchingClient.dll
+/Users/joupark/DirForClone/testGameServer/MatchingClient/obj/Debug/net8.0/MatchingClient.sourcelink.json

@@ -29,7 +29,7 @@ namespace MatchingClient.Services
                 for (int i = 0; i < 3; i++)
                 {
                     Player player = playerQueue.Dequeue();
-                    team.Players.Add(player);
+                    team.Players?.Add(player);
                 }
                 teams.Add(team);
             }
