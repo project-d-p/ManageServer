@@ -20,10 +20,10 @@ public class Startup
             var multiplexer = ConnectionMultiplexer.Connect(configuration);
             return multiplexer;
         });
-        services.AddScoped<IGameRoomManager, GameRoomManager>(provider =>
+        services.AddScoped<IRedisCacheManager, RedisCacheManager>(provider =>
         {
             var redis = provider.GetRequiredService<IConnectionMultiplexer>();
-            return new GameRoomManager(redis);
+            return new RedisCacheManager(redis);
         });
 
         // GrpcGameServerClient registration
@@ -32,6 +32,7 @@ public class Startup
             var serverAddress = "http://localhost:5255"; // 직접 지정한 서버 주소
             return new GrpcGameServerClient(serverAddress);
         });
+        services.AddScoped<RoomMatchManager>();
     }
 
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

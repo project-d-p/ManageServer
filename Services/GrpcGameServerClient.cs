@@ -22,12 +22,24 @@ namespace MatchingClient.Services
             try
             {
                 var response = await _client.CreateChannelAsync(new Empty());
-                return response;
+                Room newRoom = new Room
+                {
+                    RoomId = response.ChannelId,
+                    IP = response.UdpIp,
+                    UdpPort = response.UdpPort,
+                    TcpPort = response.TcpPort
+                };
+                return newRoom;
+            }
+            catch (RpcException rpcEx)
+            {
+                Console.WriteLine($"RPC Error: {rpcEx.StatusCode} - {rpcEx.Message}");
+                throw; // Re-throwing can be replaced with more sophisticated error handling
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"An error occurred: {ex.Message}");
-                throw;
+                Console.WriteLine($"An unexpected error occurred: {ex.Message}");
+                throw; // Ensure all exceptions are caught and logged
             }
         }
 
@@ -38,10 +50,15 @@ namespace MatchingClient.Services
                 var response = await _client.AttachPlayerAsync(request);
                 return response;
             }
+            catch (RpcException rpcEx)
+            {
+                Console.WriteLine($"RPC Error: {rpcEx.StatusCode} - {rpcEx.Message}");
+                throw; // Re-throwing can be replaced with more sophisticated error handling
+            }
             catch (Exception ex)
             {
-                Console.WriteLine($"An error occurred: {ex.Message}");
-                throw;
+                Console.WriteLine($"An unexpected error occurred: {ex.Message}");
+                throw; // Ensure all exceptions are caught and logged
             }
         }
     }
