@@ -16,16 +16,12 @@ public class Startup
         // Register radis connection and game room manager
         services.AddSingleton<IConnectionMultiplexer>(provider =>
         {
-            var configuration = ConfigurationOptions.Parse("localhost");
+            var configuration = ConfigurationOptions.Parse("localhost:6379");
             var multiplexer = ConnectionMultiplexer.Connect(configuration);
             return multiplexer;
         });
-        services.AddScoped<IRedisCacheManager, RedisCacheManager>(provider =>
-        {
-            var redis = provider.GetRequiredService<IConnectionMultiplexer>();
-            return new RedisCacheManager(redis);
-        });
-
+        services.AddSingleton<IRedisCacheManager, RedisCacheManager>();
+        
         // GrpcGameServerClient registration
         services.AddSingleton<GrpcGameServerClient>(provider =>
         {

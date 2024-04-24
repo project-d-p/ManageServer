@@ -22,6 +22,7 @@ namespace MatchingClient.Services
         {
             try
             {
+                Console.WriteLine("Creating a new channel...");
                 var response = await _client.CreateChannelAsync(new Empty());
                 Room newRoom = new Room
                 {
@@ -30,6 +31,7 @@ namespace MatchingClient.Services
                     UdpPort = response.UdpPort,
                     TcpPort = response.TcpPort
                 };
+                Console.WriteLine($"New channel created: {newRoom.RoomId}");
                 return newRoom;
             }
             catch (RpcException rpcEx)

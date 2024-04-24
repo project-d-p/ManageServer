@@ -17,11 +17,16 @@ namespace MatchingClient.Controllers
         }
 
         [HttpPost("match")]
-        public async Task<IActionResult> MatchPlayers(string player_token)
+        public async Task<IActionResult> MatchPlayers([FromBody] PlayerToken player_token)
         {
+            Console.WriteLine($"Matching player with token: {player_token.Player_Token}");
+            if (player_token.Player_Token == null)
+            {
+                return BadRequest();
+            }
             try
             {
-                await _roomMatchManager.MatchPlayerToRoom(player_token);
+                await _roomMatchManager.MatchPlayerToRoom(player_token.Player_Token);
                 return Ok();
             }
             catch (Exception ex)

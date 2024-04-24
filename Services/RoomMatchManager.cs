@@ -8,10 +8,10 @@ namespace MatchingClient.Services
 {
     public class RoomMatchManager
     {
-        private readonly RedisCacheManager _redisCacheManager;
+        private readonly IRedisCacheManager _redisCacheManager;
         private readonly GrpcGameServerClient _grpcClient;
 
-        public RoomMatchManager(RedisCacheManager redisCacheManager, GrpcGameServerClient grpcClient)
+        public RoomMatchManager(IRedisCacheManager redisCacheManager, GrpcGameServerClient grpcClient)
         {
             _redisCacheManager = redisCacheManager;
             _grpcClient = grpcClient;
@@ -21,6 +21,7 @@ namespace MatchingClient.Services
         {
             try
             {
+                Console.WriteLine($"Finding available room...");
                 List<string> availableRooms = await _redisCacheManager.FindAvailableRoomsAsync();
                 if (availableRooms != null && availableRooms.Count() > 0)
                 {
@@ -41,6 +42,7 @@ namespace MatchingClient.Services
         {
             try
             {
+                Console.WriteLine($"MatchPlayerToRoom...");
                 var availableRoom = await FindAvailableRoom();
                 if (availableRoom != null)
                 {
@@ -93,7 +95,12 @@ namespace MatchingClient.Services
         {
             try
             {
+                Console.WriteLine($"Creating new room and adding player...");
                 Room newRoom = await _grpcClient.CreateChannelAsync();
+                if (newRoom.RoomId == null)
+                {
+                    throw new Exception("Error creating new room.");
+                }
                 await _redisCacheManager.CreateRoomAsync(newRoom);
                 await _redisCacheManager.AddPlayerToRoomAsync(newRoom.RoomId, player_token);
                 return $"New room created and player {player_token} added to room {newRoom}.";
