@@ -1,11 +1,14 @@
+using MatchingClient.Models;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 namespace MatchingClient.Services
 {
     public interface IRedisCacheManager
     {
         Task<List<string>> FindAvailableRoomsAsync();
-        Task<string> FindRoomByPlayerAsync(string playerId);
-        Task AddPlayerToRoomAsync(string roomId, string playerId);
-        Task CreateRoomAsync(string roomId, string ip, string udpPort, string tcpPort);
+        Task<string?> FindRoomByPlayerAsync(string playerId);
+        Task<Room> AddPlayerToRoomAsync(string roomId, string playerId);
+        Task CreateRoomAsync(Room room);
         Task RemoveRoomAsync(string roomId);
     }
 }

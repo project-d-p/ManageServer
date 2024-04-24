@@ -17,60 +17,91 @@ namespace MatchingClient.Services
             _grpcClient = grpcClient;
         }
 
-        public async Task<string> FindAvailableRoom()
+        public async Task<string?> FindAvailableRoom()
         {
-            var availableRooms = await _redisCacheManager.FindAvailableRoomsAsync();
-            if (availableRooms != null && availableRooms.Length > 0)
+            try
             {
-                return availableRooms[0];
+                List<string> availableRooms = await _redisCacheManager.FindAvailableRoomsAsync();
+                if (availableRooms != null && availableRooms.Count() > 0)
+                {
+                    return availableRooms[0];
+                }
+                else
+                {
+                    return null;
+                }
             }
-            else
+            catch (Exception ex)
             {
-                return null;
+                throw new Exception($"Error finding available room: {ex.Message}");
             }
         }
 
         public async Task<string> MatchPlayerToRoom(string player_token)
         {
-            var availableRoom = await FindAvailableRoom();
-            if (availableRoom != null)
+            try
             {
-                return await AddPlayerAndStartGameIfFull(player_token, availableRoom);
+                var availableRoom = await FindAvailableRoom();
+                if (availableRoom != null)
+                {
+                    return await AddPlayerAndStartGameIfFull(player_token, availableRoom);
+                }
+                else
+                {
+                    return await CreateNewRoomAndAddPlayer(player_token);
+                }
             }
-            else
+            catch (Exception ex)
             {
-                return await CreateNewRoomAndAddPlayer(player_token);
+                Console.WriteLine($"Error processing the match operation: {ex.Message}");
+                return "Error: Failed to process the match operation.";
             }
         }
 
-        private async Task<string> AddPlayerAndStartGameIfFull(string player_token, string roomId)
-        {
-            // Add the player to the room
-            Room updatedRoom = await _redisCacheManager.AddPlayerToRoomAsync(room, player_token);
-            
-            // Check if the room is full
-            if (updatedRoom.Players.Count >= 3)
-            {
-                // Start the game
-                await _grpcClient.AttachPlayerAsync(new RequestLaunch
-                {
-                    PlayerToken = updatedRoom.Players,
-                    ChannelId = roomId
-                });
-                return $"Room: {roomId} is full. Game started.";
-            }
 
-            // If the room is not full, return a message indicating the player has been added
-            return $"Player {player_token} added to room {room}.";
+        private async Task<string> AddPlayerAndStartGameIfFull(string playerToken, string roomId)
+        {
+            try
+            {
+                // 플레이어를 방에 추가
+                Room updatedRoom = await _redisCacheManager.AddPlayerToRoomAsync(roomId, playerToken);
+                
+                // 방이 가득 찼는지 확인
+                if (updatedRoom.Players.Count >= 3)
+                {
+                    // 게임 시작
+                    var requestLaunch = new Matching.RequestLaunch
+                    {
+                    ChannelId = roomId
+                    };
+                    requestLaunch.PlayerToken.AddRange(updatedRoom.Players);  // 리스트에 플레이어 추가
+                    await _grpcClient.AttachPlayerAsync(requestLaunch);
+                    return $"Room: {roomId} is full. Game started.";
+                }
+
+                // 방이 가득 차지 않았다면 플레이어 추가 완료 메시지 반환
+                return $"Player {playerToken} added to room {roomId}.";
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error adding player to room: {ex.Message}");
+            }
         }
 
 
         private async Task<string> CreateNewRoomAndAddPlayer(string player_token)
         {
-            Room newRoom = await _grpcClient.CreateChannelAsync();
-            await _redisCacheManager.CreateRoomAsync(newRoom);
-            await _redisCacheManager.AddPlayerToRoomAsync(newRoom.RoomId, player_token);
-            return $"New room created and player {player_token} added to room {newRoom}.";
+            try
+            {
+                Room newRoom = await _grpcClient.CreateChannelAsync();
+                await _redisCacheManager.CreateRoomAsync(newRoom);
+                await _redisCacheManager.AddPlayerToRoomAsync(newRoom.RoomId, player_token);
+                return $"New room created and player {player_token} added to room {newRoom}.";
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error creating new room and adding player: {ex.Message}");
+            }
         }
     }
 }

@@ -46,17 +46,29 @@ namespace Matching {
     }
 
     [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
-    static readonly grpc::Marshaller<global::Matching.TeamPlayers> __Marshaller_matching_TeamPlayers = grpc::Marshallers.Create(__Helper_SerializeMessage, context => __Helper_DeserializeMessage(context, global::Matching.TeamPlayers.Parser));
+    static readonly grpc::Marshaller<global::Matching.Empty> __Marshaller_matching_Empty = grpc::Marshallers.Create(__Helper_SerializeMessage, context => __Helper_DeserializeMessage(context, global::Matching.Empty.Parser));
     [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
-    static readonly grpc::Marshaller<global::Matching.ServerResponse> __Marshaller_matching_ServerResponse = grpc::Marshallers.Create(__Helper_SerializeMessage, context => __Helper_DeserializeMessage(context, global::Matching.ServerResponse.Parser));
+    static readonly grpc::Marshaller<global::Matching.ChannelResponse> __Marshaller_matching_ChannelResponse = grpc::Marshallers.Create(__Helper_SerializeMessage, context => __Helper_DeserializeMessage(context, global::Matching.ChannelResponse.Parser));
+    [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+    static readonly grpc::Marshaller<global::Matching.RequestLaunch> __Marshaller_matching_RequestLaunch = grpc::Marshallers.Create(__Helper_SerializeMessage, context => __Helper_DeserializeMessage(context, global::Matching.RequestLaunch.Parser));
+    [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+    static readonly grpc::Marshaller<global::Matching.ResponseLaunch> __Marshaller_matching_ResponseLaunch = grpc::Marshallers.Create(__Helper_SerializeMessage, context => __Helper_DeserializeMessage(context, global::Matching.ResponseLaunch.Parser));
 
     [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
-    static readonly grpc::Method<global::Matching.TeamPlayers, global::Matching.ServerResponse> __Method_SendTeamPlayers = new grpc::Method<global::Matching.TeamPlayers, global::Matching.ServerResponse>(
+    static readonly grpc::Method<global::Matching.Empty, global::Matching.ChannelResponse> __Method_CreateChannel = new grpc::Method<global::Matching.Empty, global::Matching.ChannelResponse>(
         grpc::MethodType.Unary,
         __ServiceName,
-        "SendTeamPlayers",
-        __Marshaller_matching_TeamPlayers,
-        __Marshaller_matching_ServerResponse);
+        "CreateChannel",
+        __Marshaller_matching_Empty,
+        __Marshaller_matching_ChannelResponse);
+
+    [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+    static readonly grpc::Method<global::Matching.RequestLaunch, global::Matching.ResponseLaunch> __Method_AttachPlayer = new grpc::Method<global::Matching.RequestLaunch, global::Matching.ResponseLaunch>(
+        grpc::MethodType.Unary,
+        __ServiceName,
+        "AttachPlayer",
+        __Marshaller_matching_RequestLaunch,
+        __Marshaller_matching_ResponseLaunch);
 
     /// <summary>Service descriptor</summary>
     public static global::Google.Protobuf.Reflection.ServiceDescriptor Descriptor
@@ -91,53 +103,45 @@ namespace Matching {
       {
       }
 
-      /// <summary>
-      /// TeamPlayers 정보를 전송하고 ServerResponse를 받는 메서드
-      /// </summary>
-      /// <param name="request">The request to send to the server.</param>
-      /// <param name="headers">The initial metadata to send with the call. This parameter is optional.</param>
-      /// <param name="deadline">An optional deadline for the call. The call will be cancelled if deadline is hit.</param>
-      /// <param name="cancellationToken">An optional token for canceling the call.</param>
-      /// <returns>The response received from the server.</returns>
       [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
-      public virtual global::Matching.ServerResponse SendTeamPlayers(global::Matching.TeamPlayers request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
+      public virtual global::Matching.ChannelResponse CreateChannel(global::Matching.Empty request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
       {
-        return SendTeamPlayers(request, new grpc::CallOptions(headers, deadline, cancellationToken));
+        return CreateChannel(request, new grpc::CallOptions(headers, deadline, cancellationToken));
       }
-      /// <summary>
-      /// TeamPlayers 정보를 전송하고 ServerResponse를 받는 메서드
-      /// </summary>
-      /// <param name="request">The request to send to the server.</param>
-      /// <param name="options">The options for the call.</param>
-      /// <returns>The response received from the server.</returns>
       [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
-      public virtual global::Matching.ServerResponse SendTeamPlayers(global::Matching.TeamPlayers request, grpc::CallOptions options)
+      public virtual global::Matching.ChannelResponse CreateChannel(global::Matching.Empty request, grpc::CallOptions options)
       {
-        return CallInvoker.BlockingUnaryCall(__Method_SendTeamPlayers, null, options, request);
+        return CallInvoker.BlockingUnaryCall(__Method_CreateChannel, null, options, request);
       }
-      /// <summary>
-      /// TeamPlayers 정보를 전송하고 ServerResponse를 받는 메서드
-      /// </summary>
-      /// <param name="request">The request to send to the server.</param>
-      /// <param name="headers">The initial metadata to send with the call. This parameter is optional.</param>
-      /// <param name="deadline">An optional deadline for the call. The call will be cancelled if deadline is hit.</param>
-      /// <param name="cancellationToken">An optional token for canceling the call.</param>
-      /// <returns>The call object.</returns>
       [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
-      public virtual grpc::AsyncUnaryCall<global::Matching.ServerResponse> SendTeamPlayersAsync(global::Matching.TeamPlayers request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
+      public virtual grpc::AsyncUnaryCall<global::Matching.ChannelResponse> CreateChannelAsync(global::Matching.Empty request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
       {
-        return SendTeamPlayersAsync(request, new grpc::CallOptions(headers, deadline, cancellationToken));
+        return CreateChannelAsync(request, new grpc::CallOptions(headers, deadline, cancellationToken));
       }
-      /// <summary>
-      /// TeamPlayers 정보를 전송하고 ServerResponse를 받는 메서드
-      /// </summary>
-      /// <param name="request">The request to send to the server.</param>
-      /// <param name="options">The options for the call.</param>
-      /// <returns>The call object.</returns>
       [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
-      public virtual grpc::AsyncUnaryCall<global::Matching.ServerResponse> SendTeamPlayersAsync(global::Matching.TeamPlayers request, grpc::CallOptions options)
+      public virtual grpc::AsyncUnaryCall<global::Matching.ChannelResponse> CreateChannelAsync(global::Matching.Empty request, grpc::CallOptions options)
       {
-        return CallInvoker.AsyncUnaryCall(__Method_SendTeamPlayers, null, options, request);
+        return CallInvoker.AsyncUnaryCall(__Method_CreateChannel, null, options, request);
+      }
+      [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+      public virtual global::Matching.ResponseLaunch AttachPlayer(global::Matching.RequestLaunch request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
+      {
+        return AttachPlayer(request, new grpc::CallOptions(headers, deadline, cancellationToken));
+      }
+      [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+      public virtual global::Matching.ResponseLaunch AttachPlayer(global::Matching.RequestLaunch request, grpc::CallOptions options)
+      {
+        return CallInvoker.BlockingUnaryCall(__Method_AttachPlayer, null, options, request);
+      }
+      [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+      public virtual grpc::AsyncUnaryCall<global::Matching.ResponseLaunch> AttachPlayerAsync(global::Matching.RequestLaunch request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
+      {
+        return AttachPlayerAsync(request, new grpc::CallOptions(headers, deadline, cancellationToken));
+      }
+      [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+      public virtual grpc::AsyncUnaryCall<global::Matching.ResponseLaunch> AttachPlayerAsync(global::Matching.RequestLaunch request, grpc::CallOptions options)
+      {
+        return CallInvoker.AsyncUnaryCall(__Method_AttachPlayer, null, options, request);
       }
       /// <summary>Creates a new instance of client from given <c>ClientBaseConfiguration</c>.</summary>
       [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]

@@ -9,24 +9,26 @@ namespace MatchingClient.Controllers
     [Route("[controller]")]
     public class ApiClientController : ControllerBase
     {
-        private readonly GrpcGameServerClient _grpcClient;
+        private readonly RoomMatchManager _roomMatchManager;
 
-        public ApiClientController(GrpcGameServerClient grpcClient)
+        public ApiClientController(RoomMatchManager roomMatchManager)
         {
-            _grpcClient = grpcClient;
+            _roomMatchManager = roomMatchManager;
         }
 
         [HttpPost("match")]
-        public async Task<IActionResult> MatchPlayers()
+        public async Task<IActionResult> MatchPlayers(string player_token)
         {
-            var response = await _grpcClient.RequestTeamMatch(new string[] { "player1", "player2" });
-
-            return Ok(new {
-                UdpIp = response.UDPIP,
-                UdpPort = response.UDPPort,
-                TcpIp = response.TCPIP,
-                TcpPort = response.TCPPort
-            });
+            try
+            {
+                await _roomMatchManager.MatchPlayerToRoom(player_token);
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return StatusCode(500);
+            }
         }
     }
 }

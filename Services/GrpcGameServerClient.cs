@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using Grpc.Core;
 using Grpc.Net.Client;
 using MatchingClient.Models;
 using Matching;
@@ -17,7 +18,7 @@ namespace MatchingClient.Services
             _client = new MatchingService.MatchingServiceClient(_channel);
         }
 
-        public async Task<ChannelResponse> CreateChannelAsync()
+        public async Task<Room> CreateChannelAsync()
         {
             try
             {
@@ -43,7 +44,7 @@ namespace MatchingClient.Services
             }
         }
 
-        public async Task<ResponseLaunch> AttachPlayerAsync(RequestLaunch request)
+        public async Task<Matching.ResponseLaunch> AttachPlayerAsync(Matching.RequestLaunch request)
         {
             try
             {

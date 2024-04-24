@@ -4,12 +4,12 @@ namespace MatchingClient.Models
 {
     public class Room
     {
-        public string RoomId { get; set; }
+        public string? RoomId { get; set; }
         public List<string> Players { get; set; }
         public bool IsActive { get; set; }
-        public string IP { get; set; }
-        public string UdpPort { get; set; }
-        public string TcpPort { get; set; }
+        public string? IP { get; set; }
+        public string? UdpPort { get; set; }
+        public string? TcpPort { get; set; }
 
         public Room()
         {
