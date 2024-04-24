@@ -1,40 +1,46 @@
-using MatchingClient.Models;
+using System.Collections.Generic;
+using StackExchange.Redis;
+using System.Linq;
 
 namespace MatchingClient.Services
 {
-    public class NomalMatching : MatchingQueue
+    public class NormalMatching
     {
-        private Queue<Player> playerQueue;
+        private readonly GameRoomManager _gameRoomManager;
+        private readonly GrpcGameServerClient _grpcClient;
 
-        public NomalMatching()
+        public NormalMatching(GameRoomManager gameRoomManager, GrpcGameServerClient grpcClient)
         {
-            playerQueue = new Queue<Player>();
+            _gameRoomManager = gameRoomManager;
+            _grpcClient = grpcClient;
         }
 
-        public void EnqueuePlayer(Player player)
+        public async Task<Dictionary<string, string>?> FindOrCreateTimeRoomAsync()
         {
-            playerQueue.Enqueue(player);
-        }
-        public Player DequeuePlayer()
-        {
-            return playerQueue.Dequeue();
-        }
-        public Team[] FormTeams()
-        {
-            List<Team> teams = new List<Team>();
-
-            while (playerQueue.Count >= 3)
+            var availableRooms = _gameRoomManager.GetAllRooms(room => room.ContainsKey("status") && room["status"] == "available");
+            var firstRoom = availableRooms.FirstOrDefault();
+            if (firstRoom != null)
             {
-                Team team = new Team();
-                for (int i = 0; i < 3; i++)
-                {
-                    Player player = playerQueue.Dequeue();
-                    team.Players?.Add(player);
-                }
-                teams.Add(team);
+                await _grpcClient.NotifyRoomSelection(firstRoom["roomId"]);
+                return firstRoom;
             }
 
-            return teams.ToArray();
+            // If no rooms are available, create a new room
+            return await CreateAndRegisterNewRoomAsync();
+        }
+
+
+        private async Task<Dictionary<string, string>?> CreateAndRegisterNewRoomAsync()
+        {
+            var newRoomSettings = _grpcClient.CreateGameRoom();
+            if (newRoomSettings != null)
+            {
+                _gameRoomManager.RegisterRoom(newRoomSettings["roomId"], newRoomSettings);
+                await _grpcClient.NotifyRoomSelection(newRoomSettings["roomId"]);
+                return newRoomSettings;
+            }
+
+            return null;
         }
     }
 }

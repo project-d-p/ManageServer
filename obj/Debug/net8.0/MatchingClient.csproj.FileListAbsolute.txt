@@ -19,3 +19,5 @@
 /Users/joupark/DirForClone/testGameServer/MatchingClient/obj/Debug/net8.0/MatchingClient.genruntimeconfig.cache
 /Users/joupark/DirForClone/testGameServer/MatchingClient/obj/Debug/net8.0/ref/MatchingClient.dll
 /Users/joupark/DirForClone/testGameServer/MatchingClient/obj/Debug/net8.0/MatchingClient.sourcelink.json
+/Users/joupark/DirForClone/testGameServer/MatchingClient/bin/Debug/net8.0/Pipelines.Sockets.Unofficial.dll
+/Users/joupark/DirForClone/testGameServer/MatchingClient/bin/Debug/net8.0/StackExchange.Redis.dll

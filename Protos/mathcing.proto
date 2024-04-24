@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+package matching;
+
+service MatchingService {
+  rpc CreateChannel(Empty) returns (ChannelResponse);
+  rpc AttachPlayer(RequestLaunch) returns (ResponseLaunch);
+}
+
+message Empty {
+}
+
+message ChannelResponse {
+  string channel_id = 1;
+  string udp_ip = 2;
+  string udp_port = 3; 
+  string tcp_ip = 4;
+  string tcp_port = 5; 
+}
+
+message RequestLaunch {
+  repeated string player_token = 1;
+  string channel_id = 2;
+}
+
+message ResponseLaunch {
+  int32 status = 1;
+}
