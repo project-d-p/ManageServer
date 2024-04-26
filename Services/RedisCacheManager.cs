@@ -13,6 +13,17 @@ namespace MatchingClient.Services
             _db = redis.GetDatabase();
         }
 
+        public async Task<bool> AcquireLockAsync(string lockKey, TimeSpan expiry)
+        {
+            bool acquired = await _db.StringSetAsync(lockKey, "locked", expiry, When.NotExists);
+            return acquired;
+        }
+
+        public async Task ReleaseLockAsync(string lockKey)
+        {
+            await _db.KeyDeleteAsync(lockKey);
+        }
+
         public async Task<List<string>> FindAvailableRoomsAsync()
         {
             try
@@ -112,6 +123,16 @@ namespace MatchingClient.Services
 
         public async Task<Room> AddPlayerToRoomAsync(string? roomId, string? playerId)
         {
+            string lockKey = $"lock:room:{roomId}";
+            TimeSpan lockTimeout = TimeSpan.FromSeconds(10); // 예: 10초 동안 락 유지
+
+            // 락 획득 시도
+            bool lockAcquired = await AcquireLockAsync(lockKey, lockTimeout);
+            if (!lockAcquired)
+            {
+                throw new Exception("Unable to acquire lock for room operations.");
+            }
+
             if (roomId == null || playerId == null)
             {
                 throw new ArgumentNullException(nameof(roomId));
@@ -140,6 +161,11 @@ namespace MatchingClient.Services
             catch (Exception ex)
             {
                 throw new Exception("Error accessing Redis cache.", ex);
+            }
+            finally
+            {
+                // 작업 완료 후 락 해제
+                await ReleaseLockAsync(lockKey);
             }
         }
 
