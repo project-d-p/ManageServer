@@ -3,6 +3,7 @@ using StackExchange.Redis;
 using System.Linq;
 using System.Threading.Tasks;
 using MatchingClient.Models;
+using System.Threading;
 
 namespace MatchingClient.Services
 {
@@ -60,6 +61,41 @@ namespace MatchingClient.Services
             }
         }
 
+        public async Task<Room?> WaitForMatch(string playerToken, CancellationToken cancellationToken)
+        {
+            try
+            {
+                Console.WriteLine($"Waiting for match in room: {playerToken}...");
+                while (!cancellationToken.IsCancellationRequested)
+                {
+                    string? roomId = await _redisCacheManager.FindRoomByPlayerAsync(playerToken);
+                    if (roomId == null)
+                    {
+                        await Task.Delay(5000, cancellationToken);  // 5초마다 검사
+                        continue;
+                    }
+                    Room? room = await _redisCacheManager.GetRoomAsync(roomId);
+                    if (room != null && room.Players.Count >= 3)
+                    {
+                        // 게임 시작 로직을 여기에 구현
+                        return room;
+                    }
+                    // 필요한 인원이 모이지 않았으면 일정 시간 대기
+                    await Task.Delay(5000, cancellationToken);  // 5초마다 검사
+                }
+                return null;
+            }
+            catch (OperationCanceledException)
+            {
+                Console.WriteLine("The operation was cancelled.");
+                throw new OperationCanceledException("The operation was cancelled.");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error while waiting for the match: {ex.Message}");
+                throw new Exception($"Error while waiting for the match: {ex.Message}");
+            }
+        }
 
         private async Task<string> AddPlayerAndStartGameIfFull(string playerToken, string roomId)
         {

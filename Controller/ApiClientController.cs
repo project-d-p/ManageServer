@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 using MatchingClient.Services;
 using MatchingClient.Models;
+using System.Threading; // CancellationToken 사용을 위해 추가
 
 namespace MatchingClient.Controllers
 {
@@ -22,7 +23,7 @@ namespace MatchingClient.Controllers
             Console.WriteLine($"Matching player with token: {player_token.Player_Token}");
             if (player_token.Player_Token == null)
             {
-                return BadRequest();
+                return BadRequest("Player token is required.");
             }
             try
             {
@@ -32,7 +33,39 @@ namespace MatchingClient.Controllers
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
-                return StatusCode(500);
+                return StatusCode(500, "Internal server error.");
+            }
+        }
+
+        [HttpGet("wait-for-match")]
+        public async Task<IActionResult> WaitForMatch(string playerToken, CancellationToken cancellationToken)
+        {
+            Console.WriteLine($"Waiting for a match for player with token: {playerToken}");
+            if (string.IsNullOrEmpty(playerToken))
+            {
+                return BadRequest("Player token is required.");
+            }
+            try
+            {
+                var matchFound = await _roomMatchManager.WaitForMatch(playerToken, cancellationToken);
+                if (matchFound != null)
+                {
+                    return Ok(matchFound);
+                }
+                else
+                {
+                    return NotFound("No match found.");
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                Console.WriteLine("Request was canceled.");
+                return BadRequest("Request was canceled by the client.");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error while waiting for match: {ex.Message}");
+                return StatusCode(500, "Internal server error while waiting for match.");
             }
         }
     }

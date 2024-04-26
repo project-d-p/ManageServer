@@ -73,6 +73,43 @@ namespace MatchingClient.Services
             }
         }
 
+        public async Task<Room?> GetRoomAsync(string roomId)
+        {
+            try
+            {
+                var roomHash = await _db.HashGetAllAsync($"room:{roomId}");
+                string? players = roomHash.FirstOrDefault(x => x.Name == "players").Value;
+                List<string> playerList = new List<string>(); 
+                if (players != null)
+                    playerList = JsonSerializer.Deserialize<List<string>>(players) ?? new List<string>();
+                string? isActiveStr = roomHash.FirstOrDefault(x => x.Name == "active").Value;
+                bool isActive = true;
+                if (isActiveStr == "false")
+                {
+                    isActive = false;
+                }
+                if (roomHash.Length == 0)
+                {
+                    return null; // 방 정보가 존재하지 않음
+                }
+                var room = new Room
+                {
+                    RoomId = roomId,
+                    Players = playerList,
+                    IsActive = isActive,
+                    IP = roomHash.FirstOrDefault(x => x.Name == "ip").Value,
+                    UdpPort = roomHash.FirstOrDefault(x => x.Name == "udpPort").Value,
+                    TcpPort = roomHash.FirstOrDefault(x => x.Name == "tcpPort").Value
+                };
+
+                return room;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error retrieving room with ID {roomId}: {ex.Message}");
+            }
+        }
+
         public async Task<Room> AddPlayerToRoomAsync(string? roomId, string? playerId)
         {
             if (roomId == null || playerId == null)
