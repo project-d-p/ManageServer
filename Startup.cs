@@ -25,7 +25,7 @@ public class Startup
         // GrpcGameServerClient registration
         services.AddSingleton<GrpcGameServerClient>(provider =>
         {
-            var serverAddress = "http://localhost:5255"; // 직접 지정한 서버 주소
+            var serverAddress = "http://10.19.225.124:50051"; // 직접 지정한 서버 주소
             return new GrpcGameServerClient(serverAddress);
         });
         services.AddScoped<RoomMatchManager>();

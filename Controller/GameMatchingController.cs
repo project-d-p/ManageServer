@@ -7,17 +7,17 @@ using System.Threading; // CancellationToken 사용을 위해 추가
 namespace MatchingClient.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
-    public class ApiClientController : ControllerBase
+    [Route("game-matching")]
+    public class GameMatchingController : ControllerBase
     {
         private readonly RoomMatchManager _roomMatchManager;
 
-        public ApiClientController(RoomMatchManager roomMatchManager)
+        public GameMatchingController(RoomMatchManager roomMatchManager)
         {
             _roomMatchManager = roomMatchManager;
         }
 
-        [HttpPost("match")]
+        [HttpPost("request-match")]
         public async Task<IActionResult> MatchPlayers([FromBody] PlayerToken player_token)
         {
             Console.WriteLine($"Matching player with token: {player_token.Player_Token}");
@@ -37,7 +37,7 @@ namespace MatchingClient.Controllers
             }
         }
 
-        [HttpGet("wait-for-match")]
+        [HttpGet("status")]
         public async Task<IActionResult> WaitForMatch(string playerToken, CancellationToken cancellationToken)
         {
             Console.WriteLine($"Waiting for a match for player with token: {playerToken}");

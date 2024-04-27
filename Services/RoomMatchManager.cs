@@ -113,7 +113,8 @@ namespace MatchingClient.Services
                     ChannelId = roomId
                     };
                     requestLaunch.PlayerToken.AddRange(updatedRoom.Players);  // 리스트에 플레이어 추가
-                    await _grpcClient.AttachPlayerAsync(requestLaunch);
+                    // 클라이언트에게 게임 시작 확인 작업 추가
+                    // await _grpcClient.AttachPlayerAsync(requestLaunch);
                     return $"Room: {roomId} is full. Game started.";
                 }
 
