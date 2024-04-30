@@ -1462,11 +1462,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/Users/joupark/DirForClone/testGameServer/MatchingClient/MatchingClient.csproj",
+      "projectUniqueName": "/Users/joupark/DirForClone/ManageServer/MatchingClient.csproj",
       "projectName": "MatchingClient",
-      "projectPath": "/Users/joupark/DirForClone/testGameServer/MatchingClient/MatchingClient.csproj",
+      "projectPath": "/Users/joupark/DirForClone/ManageServer/MatchingClient.csproj",
       "packagesPath": "/Users/joupark/.nuget/packages/",
-      "outputPath": "/Users/joupark/DirForClone/testGameServer/MatchingClient/obj/",
+      "outputPath": "/Users/joupark/DirForClone/ManageServer/obj/",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "/Users/joupark/.nuget/NuGet/NuGet.Config"

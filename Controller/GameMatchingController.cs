@@ -37,17 +37,17 @@ namespace MatchingClient.Controllers
             }
         }
 
-        [HttpGet("status")]
-        public async Task<IActionResult> WaitForMatch(string playerToken, CancellationToken cancellationToken)
+        [HttpPost("status")]
+        public async Task<IActionResult> WaitForMatch([FromBody] PlayerToken player_token, CancellationToken cancellationToken)
         {
-            Console.WriteLine($"Waiting for a match for player with token: {playerToken}");
-            if (string.IsNullOrEmpty(playerToken))
+            Console.WriteLine($"Waiting for a match for player with token: {player_token.Player_Token}");
+            if (string.IsNullOrEmpty(player_token.Player_Token))
             {
                 return BadRequest("Player token is required.");
             }
             try
             {
-                var matchFound = await _roomMatchManager.WaitForMatch(playerToken, cancellationToken);
+                var matchFound = await _roomMatchManager.WaitForMatch(player_token.Player_Token, cancellationToken);
                 if (matchFound != null)
                 {
                     return Ok(matchFound);

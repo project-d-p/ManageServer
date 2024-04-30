@@ -68,13 +68,13 @@ namespace MatchingClient.Services
                 Console.WriteLine($"Waiting for match in room: {playerToken}...");
                 while (!cancellationToken.IsCancellationRequested)
                 {
-                    string? roomId = await _redisCacheManager.FindRoomByPlayerAsync(playerToken);
-                    if (roomId == null)
+                    Room? room = await _redisCacheManager.GetRoomByPlayerIdAsync(playerToken);
+                    if (room == null)
                     {
                         await Task.Delay(5000, cancellationToken);  // 5초마다 검사
                         continue;
                     }
-                    Room? room = await _redisCacheManager.GetRoomAsync(roomId);
+                    Console.WriteLine($"Room: {room.Players.Count} players in room {room.RoomId}");
                     if (room != null && room.Players.Count >= 3)
                     {
                         // 게임 시작 로직을 여기에 구현

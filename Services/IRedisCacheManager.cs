@@ -6,10 +6,10 @@ namespace MatchingClient.Services
     public interface IRedisCacheManager
     {
         Task<List<string>> FindAvailableRoomsAsync();
-        Task<string?> FindRoomByPlayerAsync(string playerId);
-        Task<Room?> GetRoomAsync(string roomId);
+        Task<Room?> GetRoomByPlayerIdAsync(string playerId);
+        Task<Room?> GetRoomByRoomIdAsync(string roomId);
         Task<Room> AddPlayerToRoomAsync(string roomId, string playerId);
         Task CreateRoomAsync(Room room);
-        Task RemoveRoomAsync(string roomId);
+        Task ResetRoomAsync(string roomId);
     }
 }

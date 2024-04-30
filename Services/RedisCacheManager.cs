@@ -12,24 +12,112 @@ namespace MatchingClient.Services
         {
             _db = redis.GetDatabase();
         }
-
+        // Redis 락 관련 메서드
         public async Task<bool> AcquireLockAsync(string lockKey, TimeSpan expiry)
         {
             bool acquired = await _db.StringSetAsync(lockKey, "locked", expiry, When.NotExists);
             return acquired;
         }
-
         public async Task ReleaseLockAsync(string lockKey)
         {
             await _db.KeyDeleteAsync(lockKey);
         }
+        // Redis 관련 공용 메서드
+        public async Task<Room?> GetRoomByRoomIdAsync(string roomId)
+        {
+            if (string.IsNullOrEmpty(roomId))
+            {
+                throw new ArgumentNullException(nameof(roomId), "Room ID cannot be null or empty.");
+            }
 
+            string roomKey = $"room:{roomId}";
+            HashEntry[] hashEntries = await _db.HashGetAllAsync(roomKey);
+
+            if (hashEntries.Length == 0)
+            {
+                throw new KeyNotFoundException($"No room found with ID: {roomId}");
+            }
+
+            var room = new Room
+            {
+                RoomId = roomId
+            };
+
+            foreach (var entry in hashEntries)
+            {
+                switch (entry.Name.ToString())
+                {
+                    case "players":
+                        string playersJson = entry.Value.HasValue ? entry.Value.ToString() : "[]";
+                        room.Players = JsonSerializer.Deserialize<List<string>>(playersJson) ?? new List<string>();
+                        break;
+                    case "active":
+                        if (entry.Value.HasValue)
+                            room.IsActive = bool.TryParse(entry.Value, out bool isActive);
+                        else
+                            room.IsActive = false;
+                        break;
+                    case "ip":
+                        room.IP = entry.Value;
+                        break;
+                    case "udpPort":
+                        room.UdpPort = entry.Value;
+                        break;
+                    case "tcpPort":
+                        room.TcpPort = entry.Value;
+                        break;
+                }
+            }
+
+            return room;
+        }
+        public async Task<Room?> GetRoomByPlayerIdAsync(string playerId)
+        {
+            if (string.IsNullOrEmpty(playerId))
+            {
+                throw new ArgumentNullException(nameof(playerId), "Player ID cannot be null or empty.");
+            }
+            try
+            {
+                var roomKeys = GetAllRoomKeys();
+
+                foreach (var key in roomKeys)
+                {
+                    var room = await GetRoomByRoomIdAsync(key);
+
+                    if (room != null && room.Players.Contains(playerId))
+                    {
+                        return room;
+                    }
+                }
+                return null; // No room found with the specified player ID
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error accessing Redis cache.", ex);
+            }
+        }
+        public IEnumerable<string> GetAllRoomKeys()
+        {
+            var endpoint = _db.Multiplexer.GetEndPoints()[0];
+            var server = _db.Multiplexer.GetServer(endpoint);
+            var keys = new List<string>();
+
+            // Keys 메서드를 사용하여 모든 'room:*' 키를 검색합니다.
+            // 이 메소드는 내부적으로 SCAN을 사용하며, 모든 키를 적절히 가져옵니다.
+            foreach (var key in server.Keys(pattern: "room:*", pageSize: 250))
+            {
+                keys.Add(key.ToString());
+            }
+
+            return keys;
+        }
+        // Matching 관련
         public async Task<List<string>> FindAvailableRoomsAsync()
         {
             try
             {
-                var server = _db.Multiplexer.GetServer(_db.Multiplexer.GetEndPoints().First());
-                var roomKeys = server.Keys(pattern: "room:*").ToArray();
+                var roomKeys = GetAllRoomKeys();
                 var availableRooms = new List<string>();
 
                 foreach (var key in roomKeys)
@@ -48,115 +136,30 @@ namespace MatchingClient.Services
                 throw new Exception("Error accessing Redis cache.", ex);
             }
         }
-
-        public async Task<string?> FindRoomByPlayerAsync(string playerId)
-        {
-            if (playerId == null)
-            {
-                throw new ArgumentNullException(nameof(playerId));
-            }
-
-            try
-            {
-                var server = _db.Multiplexer.GetServer(_db.Multiplexer.GetEndPoints().First());
-                var roomKeys = server.Keys(pattern: "room:*").ToArray();
-
-                foreach (var key in roomKeys)
-                {
-                    string? players = await _db.HashGetAsync(key, "players");
-                    List<string>? playerList = null;
-                    if (players != null)
-                    {   
-                        playerList = JsonSerializer.Deserialize<List<string>>(players);
-                    }
-                    if (playerList != null && playerList?.Contains(playerId) == true && await _db.HashGetAsync(key, "active") == "true")
-                    {
-                        // key.ToString() returns the room id    
-                        return key.ToString();
-                    }
-                }
-
-                return null;
-            }
-            catch (Exception ex)
-            {
-                throw new Exception("Error accessing Redis cache.", ex);
-            }
-        }
-
-        public async Task<Room?> GetRoomAsync(string roomId)
-        {
-            try
-            {
-                var roomHash = await _db.HashGetAllAsync($"room:{roomId}");
-                string? players = roomHash.FirstOrDefault(x => x.Name == "players").Value;
-                List<string> playerList = new List<string>(); 
-                if (players != null)
-                    playerList = JsonSerializer.Deserialize<List<string>>(players) ?? new List<string>();
-                string? isActiveStr = roomHash.FirstOrDefault(x => x.Name == "active").Value;
-                bool isActive = true;
-                if (isActiveStr == "false")
-                {
-                    isActive = false;
-                }
-                if (roomHash.Length == 0)
-                {
-                    return null; // 방 정보가 존재하지 않음
-                }
-                var room = new Room
-                {
-                    RoomId = roomId,
-                    Players = playerList,
-                    IsActive = isActive,
-                    IP = roomHash.FirstOrDefault(x => x.Name == "ip").Value,
-                    UdpPort = roomHash.FirstOrDefault(x => x.Name == "udpPort").Value,
-                    TcpPort = roomHash.FirstOrDefault(x => x.Name == "tcpPort").Value
-                };
-
-                return room;
-            }
-            catch (Exception ex)
-            {
-                throw new Exception($"Error retrieving room with ID {roomId}: {ex.Message}");
-            }
-        }
-
         public async Task<Room> AddPlayerToRoomAsync(string? roomId, string? playerId)
         {
+            if (roomId == null || playerId == null)
+            {
+                throw new ArgumentNullException("roomId or playerId", "Room ID and Player ID must not be null.");
+            }
             string lockKey = $"lock:room:{roomId}";
             TimeSpan lockTimeout = TimeSpan.FromSeconds(10); // 예: 10초 동안 락 유지
-
             // 락 획득 시도
             bool lockAcquired = await AcquireLockAsync(lockKey, lockTimeout);
             if (!lockAcquired)
             {
                 throw new Exception("Unable to acquire lock for room operations.");
             }
-
-            if (roomId == null || playerId == null)
-            {
-                throw new ArgumentNullException(nameof(roomId));
-            }
-
             try
             {
-                var room = await _db.HashGetAllAsync(roomId);
-                string? players = room.FirstOrDefault(x => x.Name == "players").Value;
-                List<string> playerList = new List<string>(); 
-                if (players != null)
-                    playerList = JsonSerializer.Deserialize<List<string>>(players) ?? new List<string>();
-                playerList.Add(playerId);
-                await _db.HashSetAsync(roomId, "players", JsonSerializer.Serialize(playerList));
-
-                return new Room
+                Room? room = await GetRoomByRoomIdAsync(roomId);
+                if (room == null)
                 {
-                    RoomId = roomId,
-                    Players = playerList,
-                    IsActive = false,
-                    IP = room.FirstOrDefault(x => x.Name == "ip").Value,
-                    UdpPort = room.FirstOrDefault(x => x.Name == "udpPort").Value,
-                    TcpPort = room.FirstOrDefault(x => x.Name == "tcpPort").Value
-                };
+                    throw new KeyNotFoundException($"No room found with ID: {roomId}");
+                }
+                room.Players.Add(playerId);
+                await _db.HashSetAsync(roomId, "players", JsonSerializer.Serialize(room.Players));
+                return room;
             }
             catch (Exception ex)
             {
@@ -166,9 +169,9 @@ namespace MatchingClient.Services
             {
                 // 작업 완료 후 락 해제
                 await ReleaseLockAsync(lockKey);
+                Console.WriteLine($"Added player {playerId} to room {roomId}");
             }
         }
-
         public async Task CreateRoomAsync(Room room)
         {
             try
@@ -189,12 +192,17 @@ namespace MatchingClient.Services
                 throw new Exception("Error accessing Redis cache.", ex);
             }
         }
-
-        public async Task RemoveRoomAsync(string roomId)
+        public async Task ResetRoomAsync(string roomId)
         {
+            var roomKey = $"room:{roomId}";
+            var fields = new RedisValue[] {"players", "active", "ip", "udpPort", "tcpPort"};
             try
             {
-                await _db.KeyDeleteAsync(roomId);
+                // 모든 필드를 초기화합니다 (값을 null로 설정)
+                foreach (var field in fields)
+                {
+                    await _db.HashSetAsync(roomKey, field, RedisValue.Null);
+                }
             }
             catch (Exception ex)
             {
