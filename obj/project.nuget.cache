@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "54QvKOdAv1SmjIuM0YNL6Of+7/2DSWJk8Y2pqNInWweNlMiHYfBgm16YSZ/LW1L7M7KWf1n1ENyldMVO4ZEWzA==",
+  "dgSpecHash": "47yz4xJ/DrUG5K81TKNZA9ftA9MIE+DWy4NTriTqYnKgL/TVu1Wip6eKkfQRDpLp7/uc0WUGhr6pgeszcXGTIw==",
   "success": true,
-  "projectFilePath": "/Users/joupark/DirForClone/testGameServer/MatchingClient/MatchingClient.csproj",
+  "projectFilePath": "/Users/joupark/DirForClone/ManageServer/MatchingClient.csproj",
   "expectedPackageFiles": [
     "/Users/joupark/.nuget/packages/google.protobuf/3.26.1/google.protobuf.3.26.1.nupkg.sha512",
     "/Users/joupark/.nuget/packages/grpc.core.api/2.62.0/grpc.core.api.2.62.0.nupkg.sha512",
