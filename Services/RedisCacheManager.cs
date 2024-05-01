@@ -29,15 +29,11 @@ namespace MatchingClient.Services
             {
                 throw new ArgumentNullException(nameof(roomId), "Room ID cannot be null or empty.");
             }
-
-            string roomKey = $"room:{roomId}";
-            HashEntry[] hashEntries = await _db.HashGetAllAsync(roomKey);
-
+            HashEntry[] hashEntries = await _db.HashGetAllAsync(roomId);
             if (hashEntries.Length == 0)
             {
                 throw new KeyNotFoundException($"No room found with ID: {roomId}");
             }
-
             var room = new Room
             {
                 RoomId = roomId
@@ -68,7 +64,6 @@ namespace MatchingClient.Services
                         break;
                 }
             }
-
             return room;
         }
         public async Task<Room?> GetRoomByPlayerIdAsync(string playerId)
@@ -122,8 +117,9 @@ namespace MatchingClient.Services
 
                 foreach (var key in roomKeys)
                 {
+                    
                     var isActive = await _db.HashGetAsync(key, "active");
-                    if (isActive == "false")
+                    if (isActive == "False")
                     {
                         availableRooms.Add(key.ToString());
                     }
@@ -142,7 +138,7 @@ namespace MatchingClient.Services
             {
                 throw new ArgumentNullException("roomId or playerId", "Room ID and Player ID must not be null.");
             }
-            string lockKey = $"lock:room:{roomId}";
+            string lockKey = $"lock:{roomId}";
             TimeSpan lockTimeout = TimeSpan.FromSeconds(10); // 예: 10초 동안 락 유지
             // 락 획득 시도
             bool lockAcquired = await AcquireLockAsync(lockKey, lockTimeout);
@@ -157,19 +153,21 @@ namespace MatchingClient.Services
                 {
                     throw new KeyNotFoundException($"No room found with ID: {roomId}");
                 }
-                room.Players.Add(playerId);
-                await _db.HashSetAsync(roomId, "players", JsonSerializer.Serialize(room.Players));
+                if (!room.Players.Contains(playerId))
+                {
+                    room.Players.Add(playerId);
+                    await _db.HashSetAsync(roomId, "players", JsonSerializer.Serialize(room.Players));
+                }
                 return room;
             }
             catch (Exception ex)
             {
-                throw new Exception("Error accessing Redis cache.", ex);
+                throw new Exception("Error accessing Redis cache.AddPlayer", ex);
             }
             finally
             {
                 // 작업 완료 후 락 해제
                 await ReleaseLockAsync(lockKey);
-                Console.WriteLine($"Added player {playerId} to room {roomId}");
             }
         }
         public async Task CreateRoomAsync(Room room)

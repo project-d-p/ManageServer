@@ -17,7 +17,20 @@ namespace MatchingClient.Services
             _redisCacheManager = redisCacheManager;
             _grpcClient = grpcClient;
         }
-
+        public async Task<bool> VaildPlayerToken(string player_token)
+        {
+            var currRooms = _redisCacheManager.GetAllRoomKeys();
+            foreach (var room in currRooms)
+            {
+                Room? currRoom = await _redisCacheManager.GetRoomByRoomIdAsync(room);
+                // Add more fields to print if needed
+                if (currRoom.Players.Contains(player_token))
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
         public async Task<string?> FindAvailableRoom()
         {
             try
@@ -38,12 +51,16 @@ namespace MatchingClient.Services
                 throw new Exception($"Error finding available room: {ex.Message}");
             }
         }
-
+        
         public async Task<string> MatchPlayerToRoom(string player_token)
         {
             try
             {
                 Console.WriteLine($"MatchPlayerToRoom...");
+                if (await VaildPlayerToken(player_token) != true)
+                {
+                    return "Player already in a room.";
+                }
                 var availableRoom = await FindAvailableRoom();
                 if (availableRoom != null)
                 {
@@ -60,7 +77,7 @@ namespace MatchingClient.Services
                 return "Error: Failed to process the match operation.";
             }
         }
-
+        
         public async Task<Room?> WaitForMatch(string playerToken, CancellationToken cancellationToken)
         {
             try
@@ -71,8 +88,7 @@ namespace MatchingClient.Services
                     Room? room = await _redisCacheManager.GetRoomByPlayerIdAsync(playerToken);
                     if (room == null)
                     {
-                        await Task.Delay(5000, cancellationToken);  // 5초마다 검사
-                        continue;
+                        throw new Exception("Player not found in any room.");
                     }
                     Console.WriteLine($"Room: {room.Players.Count} players in room {room.RoomId}");
                     if (room != null && room.Players.Count >= 3)
@@ -96,7 +112,7 @@ namespace MatchingClient.Services
                 throw new Exception($"Error while waiting for the match: {ex.Message}");
             }
         }
-
+        
         private async Task<string> AddPlayerAndStartGameIfFull(string playerToken, string roomId)
         {
             try
@@ -113,8 +129,6 @@ namespace MatchingClient.Services
                     ChannelId = roomId
                     };
                     requestLaunch.PlayerToken.AddRange(updatedRoom.Players);  // 리스트에 플레이어 추가
-                    // 클라이언트에게 게임 시작 확인 작업 추가
-                    // await _grpcClient.AttachPlayerAsync(requestLaunch);
                     return $"Room: {roomId} is full. Game started.";
                 }
 
@@ -126,8 +140,7 @@ namespace MatchingClient.Services
                 throw new Exception($"Error adding player to room: {ex.Message}");
             }
         }
-
-
+        
         private async Task<string> CreateNewRoomAndAddPlayer(string player_token)
         {
             try
@@ -139,7 +152,7 @@ namespace MatchingClient.Services
                     throw new Exception("Error creating new room.");
                 }
                 await _redisCacheManager.CreateRoomAsync(newRoom);
-                await _redisCacheManager.AddPlayerToRoomAsync(newRoom.RoomId, player_token);
+                await _redisCacheManager.AddPlayerToRoomAsync($"room:{newRoom.RoomId}", player_token);
                 return $"New room created and player {player_token} added to room {newRoom}.";
             }
             catch (Exception ex)
