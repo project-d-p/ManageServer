@@ -12,6 +12,6 @@ namespace MatchingClient.Services
         Task<Room> AddPlayerToRoomAsync(string roomId, string playerId);
         IEnumerable<string> GetAllRoomKeys();
         Task CreateRoomAsync(Room room);
-        Task ResetRoomAsync(string roomId);
+        Task<bool> ResetRoomAsync(string roomId);
     }
 }

@@ -47,6 +47,10 @@
               "target": "Package",
               "version": "[3.26.1, )"
             },
+            "Grpc.AspNetCore": {
+              "target": "Package",
+              "version": "[2.62.0, )"
+            },
             "Grpc.Net.Client": {
               "target": "Package",
               "version": "[2.62.0, )"

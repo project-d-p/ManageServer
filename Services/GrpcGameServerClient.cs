@@ -12,9 +12,9 @@ namespace MatchingClient.Services
         private readonly GrpcChannel _channel;
         private readonly MatchingService.MatchingServiceClient _client;
 
-        public GrpcGameServerClient(string serverAddress)
+        public GrpcGameServerClient(GrpcChannel channel)
         {
-            _channel = GrpcChannel.ForAddress(serverAddress);
+            _channel = channel;
             _client = new MatchingService.MatchingServiceClient(_channel);
         }
 

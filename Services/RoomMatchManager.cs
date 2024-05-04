@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using MatchingClient.Models;
 using System.Threading;
+using Matching;
 
 namespace MatchingClient.Services
 {
@@ -23,6 +24,10 @@ namespace MatchingClient.Services
             foreach (var room in currRooms)
             {
                 Room? currRoom = await _redisCacheManager.GetRoomByRoomIdAsync(room);
+                if (currRoom == null)
+                {
+                    throw new Exception("Error getting room.");
+                }
                 // Add more fields to print if needed
                 if (currRoom.Players.Contains(player_token))
                 {
@@ -78,7 +83,7 @@ namespace MatchingClient.Services
             }
         }
         
-        public async Task<Room?> WaitForMatch(string playerToken, CancellationToken cancellationToken)
+        public async Task<string?> WaitForMatch(string playerToken, CancellationToken cancellationToken)
         {
             try
             {
@@ -93,8 +98,7 @@ namespace MatchingClient.Services
                     Console.WriteLine($"Room: {room.Players.Count} players in room {room.RoomId}");
                     if (room != null && room.Players.Count >= 3)
                     {
-                        // 게임 시작 로직을 여기에 구현
-                        return room;
+                        return "ready to start";
                     }
                     // 필요한 인원이 모이지 않았으면 일정 시간 대기
                     await Task.Delay(5000, cancellationToken);  // 5초마다 검사
@@ -126,7 +130,7 @@ namespace MatchingClient.Services
                     // 게임 시작
                     var requestLaunch = new Matching.RequestLaunch
                     {
-                    ChannelId = roomId
+                        ChannelId = roomId
                     };
                     requestLaunch.PlayerToken.AddRange(updatedRoom.Players);  // 리스트에 플레이어 추가
                     return $"Room: {roomId} is full. Game started.";

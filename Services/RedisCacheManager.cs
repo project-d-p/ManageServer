@@ -190,7 +190,7 @@ namespace MatchingClient.Services
                 throw new Exception("Error accessing Redis cache.", ex);
             }
         }
-        public async Task ResetRoomAsync(string roomId)
+        public async Task<bool> ResetRoomAsync(string roomId)
         {
             var roomKey = $"room:{roomId}";
             var fields = new RedisValue[] {"players", "active", "ip", "udpPort", "tcpPort"};
@@ -201,6 +201,7 @@ namespace MatchingClient.Services
                 {
                     await _db.HashSetAsync(roomKey, field, RedisValue.Null);
                 }
+                return true;
             }
             catch (Exception ex)
             {

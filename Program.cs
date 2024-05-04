@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.Extensions.Hosting;
 using StackExchange.Redis;
 using System.Threading.Tasks;
@@ -17,6 +18,13 @@ public class Program
         Host.CreateDefaultBuilder(args)
             .ConfigureWebHostDefaults(webBuilder =>
             {
-                webBuilder.UseStartup<Startup>();  // Use Startup class to configure API
+                webBuilder.ConfigureKestrel(options =>
+                {
+                    options.ListenLocalhost(5000, listenOptions =>
+                    {
+                        listenOptions.Protocols = HttpProtocols.Http1AndHttp2;
+                        listenOptions.UseHttps();  // Enable TLS
+                    });
+                }).UseStartup<Startup>();  // Use Startup class to configure API
             });
 }

@@ -50,6 +50,7 @@ namespace MatchingClient.Controllers
                 var matchFound = await _roomMatchManager.WaitForMatch(player_token.Player_Token, cancellationToken);
                 if (matchFound != null)
                 {
+                    //start Accept Match Timer Here
                     return Ok(matchFound);
                 }
                 else
@@ -67,6 +68,22 @@ namespace MatchingClient.Controllers
                 Console.WriteLine($"Error while waiting for match: {ex.Message}");
                 return StatusCode(500, "Internal server error while waiting for match.");
             }
+        }
+        [HttpPost("start-game")]
+        public async Task<IActionResult> StartGame([FromBody] PlayerToken player_token, CancellationToken cancellationToken)
+        {
+            Console.WriteLine($"Starting game for player with token: {player_token.Player_Token}");
+            if (string.IsNullOrEmpty(player_token.Player_Token))
+            {
+                return BadRequest("Player token is required.");
+            }
+            
+            // TODO: Implement game start logic here
+            var matchFound = await _roomMatchManager.WaitForMatch(player_token.Player_Token, cancellationToken);
+            // Simulate long polling by waiting for a certain period of time
+            await Task.Delay(TimeSpan.FromSeconds(30), cancellationToken);
+            
+            return Ok(matchFound);
         }
     }
 }
