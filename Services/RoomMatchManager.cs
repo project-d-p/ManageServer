@@ -163,8 +163,16 @@ namespace MatchingClient.Services
                     await Task.Delay(2000, cancellationToken);  // 5초마다 검사
 
                     count++;
-                    if (count >= 5)
+                    if (room != null && count >= 5)
                     {
+                        Room? updateRoom = await _redisCacheManager.GetRoomByPlayerIdAsync(playerToken);
+                        if (updateRoom == null)
+                        {
+                            throw new Exception("Player not found in any room.");
+                        }
+                        if (updateRoom.AcceptPlayers.Count != 0 && updateRoom.RoomId != null)
+                            await _redisCacheManager.ResetRoomAsync(updateRoom.RoomId, new string[] { "accept_players", "players" });
+                        await _redisCacheManager.AddPlayerToFieldAsync(updateRoom.RoomId, playerToken, "players", true);
                         return null;
                     }
                 }

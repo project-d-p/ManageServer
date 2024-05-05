@@ -226,22 +226,42 @@ namespace MatchingClient.Services
                 throw new Exception("Error accessing Redis cache.", ex);
             }
         }
-        public async Task<bool> ResetRoomAsync(string roomId)
+
+        public async Task<bool> ResetRoomAsync(string roomId, string[]? fields = null)
         {
             var roomKey = $"room:{roomId}";
-            var fields = new RedisValue[] {"players", "accpet_players", "active", "ip", "udpPort", "tcpPort"};
-            try
+            if (fields == null)
             {
-                // 모든 필드를 초기화합니다 (값을 null로 설정)
-                foreach (var field in fields)
+                var allFields = new RedisValue[] { "players", "accept_players", "active", "ip", "udpPort", "tcpPort" };
+                try
                 {
-                    await _db.HashSetAsync(roomKey, field, RedisValue.Null);
+                    // 모든 필드를 초기화합니다 (값을 null로 설정)
+                    foreach (var field in allFields)
+                    {
+                        await _db.HashSetAsync(roomKey, field, RedisValue.Null);
+                    }
+                    return true;
                 }
-                return true;
+                catch (Exception ex)
+                {
+                    throw new Exception("Error accessing Redis cache.", ex);
+                }
             }
-            catch (Exception ex)
+            else
             {
-                throw new Exception("Error accessing Redis cache.", ex);
+                try
+                {
+                    // 선택한 필드들을 초기화합니다 (값을 null로 설정)
+                    foreach (var field in fields)
+                    {
+                        await _db.HashSetAsync(roomKey, field, RedisValue.Null);
+                    }
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    throw new Exception("Error accessing Redis cache.", ex);
+                }
             }
         }
     }
