@@ -170,7 +170,7 @@ namespace MatchingClient.Services
                         {
                             throw new Exception("Player not found in any room.");
                         }
-                        if (updateRoom.AcceptPlayers.Count != 0 && updateRoom.RoomId != null)
+                        if (updateRoom.Players.Count == 3 && updateRoom.RoomId != null)
                             await _redisCacheManager.ResetRoomAsync(updateRoom.RoomId, new string[] { "accept_players", "players" });
                         await _redisCacheManager.AddPlayerToFieldAsync(updateRoom.RoomId, playerToken, "players", true);
                         return null;
