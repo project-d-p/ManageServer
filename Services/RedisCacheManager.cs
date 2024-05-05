@@ -1,6 +1,7 @@
 using StackExchange.Redis;
 using MatchingClient.Models;
 using System.Text.Json;
+using System.Threading.Tasks;
 
 namespace MatchingClient.Services
 {
@@ -13,11 +14,35 @@ namespace MatchingClient.Services
             _db = redis.GetDatabase();
         }
         // Redis 락 관련 메서드
-        public async Task<bool> AcquireLockAsync(string lockKey, TimeSpan expiry)
+        public async Task<bool> AcquireLockAsync(string lockKey, TimeSpan expiry, bool waitForLock)
         {
-            bool acquired = await _db.StringSetAsync(lockKey, "locked", expiry, When.NotExists);
-            return acquired;
+            if (waitForLock)
+            {
+                int maxAttempts = 3;
+                int attempts = 0;
+                while (true)
+                {
+                    bool acquired = await _db.StringSetAsync(lockKey, "waiting", expiry, When.NotExists);
+                    if (acquired)
+                    {
+                        return true;
+                    }
+                    attempts++;
+                    if (attempts >= maxAttempts)
+                    {
+                        throw new Exception($"Failed to acquire lock after {maxAttempts} attempts.");
+                    }
+                    await Task.Delay(1000); // 일정 시간 대기 후 다시 시도
+                }
+            }
+            else
+            {
+                // 기존 락 획득 방식 사용
+                bool acquired = await _db.StringSetAsync(lockKey, "locked", expiry, When.NotExists);
+                return acquired;
+            }
         }
+
         public async Task ReleaseLockAsync(string lockKey)
         {
             await _db.KeyDeleteAsync(lockKey);
@@ -132,16 +157,16 @@ namespace MatchingClient.Services
                 throw new Exception("Error accessing Redis cache.", ex);
             }
         }
-        public async Task<Room> AddPlayerToRoomAsync(string? roomId, string? playerId)
+        public async Task<Room> AddPlayerToFieldAsync(string? roomId, string? playerId, string fieldName, bool waitForLock)
         {
             if (roomId == null || playerId == null)
             {
                 throw new ArgumentNullException("roomId or playerId", "Room ID and Player ID must not be null.");
             }
             string lockKey = $"lock:{roomId}";
-            TimeSpan lockTimeout = TimeSpan.FromSeconds(10); // 예: 10초 동안 락 유지
+            TimeSpan lockTimeout = TimeSpan.FromSeconds(5); // 예: 10초 동안 락 유지
             // 락 획득 시도
-            bool lockAcquired = await AcquireLockAsync(lockKey, lockTimeout);
+            bool lockAcquired = await AcquireLockAsync(lockKey, lockTimeout, waitForLock);
             if (!lockAcquired)
             {
                 throw new Exception("Unable to acquire lock for room operations.");
@@ -153,16 +178,25 @@ namespace MatchingClient.Services
                 {
                     throw new KeyNotFoundException($"No room found with ID: {roomId}");
                 }
-                if (!room.Players.Contains(playerId))
+
+                // 여기서 fieldName을 사용하여 필드를 선택합니다.
+                List<string>? fieldPlayers = fieldName switch
                 {
-                    room.Players.Add(playerId);
-                    await _db.HashSetAsync(roomId, "players", JsonSerializer.Serialize(room.Players));
+                    "players" => room.Players,
+                    "accept_players" => room.AcceptPlayers,
+                    _ => throw new ArgumentException("Invalid field name.", nameof(fieldName))
+                };
+
+                if (!fieldPlayers.Contains(playerId))
+                {
+                    fieldPlayers.Add(playerId);
+                    await _db.HashSetAsync(roomId, fieldName, JsonSerializer.Serialize(fieldPlayers));
                 }
                 return room;
             }
             catch (Exception ex)
             {
-                throw new Exception("Error accessing Redis cache.AddPlayer", ex);
+                throw new Exception($"Error accessing Redis cache.AddPlayer to {fieldName}", ex);
             }
             finally
             {
@@ -170,6 +204,7 @@ namespace MatchingClient.Services
                 await ReleaseLockAsync(lockKey);
             }
         }
+
         public async Task CreateRoomAsync(Room room)
         {
             try
@@ -177,6 +212,7 @@ namespace MatchingClient.Services
                 var hashEntries = new HashEntry[]
                 {
                     new HashEntry("players", JsonSerializer.Serialize(room.Players)),
+                    new HashEntry("accept_players", JsonSerializer.Serialize(room.AcceptPlayers)),
                     new HashEntry("active", room.IsActive.ToString()),
                     new HashEntry("ip", room.IP),
                     new HashEntry("udpPort", room.UdpPort),
@@ -193,7 +229,7 @@ namespace MatchingClient.Services
         public async Task<bool> ResetRoomAsync(string roomId)
         {
             var roomKey = $"room:{roomId}";
-            var fields = new RedisValue[] {"players", "active", "ip", "udpPort", "tcpPort"};
+            var fields = new RedisValue[] {"players", "accpet_players", "active", "ip", "udpPort", "tcpPort"};
             try
             {
                 // 모든 필드를 초기화합니다 (값을 null로 설정)

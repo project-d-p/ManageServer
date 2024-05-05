@@ -6,6 +6,7 @@ namespace MatchingClient.Models
     {
         public string? RoomId { get; set; }
         public List<string> Players { get; set; }
+        public List<string> AcceptPlayers { get; set; }
         public bool IsActive { get; set; }
         public string? IP { get; set; }
         public string? UdpPort { get; set; }
@@ -14,6 +15,7 @@ namespace MatchingClient.Models
         public Room()
         {
             Players = new List<string>();
+            AcceptPlayers = new List<string>();
         }
 
         public Room(string roomId, string ip, string udpPort, string tcpPort, bool isActive = false)
@@ -24,6 +26,7 @@ namespace MatchingClient.Models
             TcpPort = tcpPort;
             IsActive = isActive;
             Players = new List<string>();
+            AcceptPlayers = new List<string>();
         }
     }
 }

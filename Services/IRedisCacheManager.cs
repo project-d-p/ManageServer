@@ -9,7 +9,7 @@ namespace MatchingClient.Services
         Task<List<string>> FindAvailableRoomsAsync();
         Task<Room?> GetRoomByPlayerIdAsync(string playerId);
         Task<Room?> GetRoomByRoomIdAsync(string roomId);
-        Task<Room> AddPlayerToRoomAsync(string roomId, string playerId);
+        Task<Room> AddPlayerToFieldAsync(string? roomId, string? playerId, string fieldName, bool waitForLock);
         IEnumerable<string> GetAllRoomKeys();
         Task CreateRoomAsync(Room room);
         Task<bool> ResetRoomAsync(string roomId);
