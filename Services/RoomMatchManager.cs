@@ -114,12 +114,27 @@ namespace MatchingClient.Services
                 throw new Exception($"Error while waiting for the match: {ex.Message}");
             }
         }
-        private async Task<string> AcceptMatch(string playerToken)
+        public async Task<string> AcceptMatch(string playerToken)
         {
             try
             {
                 Room? room = await _redisCacheManager.GetRoomByPlayerIdAsync(playerToken);
-                return "";
+                if (room == null)
+                {
+                    throw new Exception("Player not found in any room.");
+                }
+                Room updatedRoom = await _redisCacheManager.AddPlayerToFieldAsync(room.RoomId, playerToken, "accept_players", true);
+                if (updatedRoom.AcceptPlayers.Count >= 3)
+                {
+                    // 게임 시작
+                    var requestLaunch = new Matching.RequestLaunch
+                    {
+                        ChannelId = updatedRoom.RoomId
+                    };
+                    requestLaunch.PlayerToken.AddRange(updatedRoom.AcceptPlayers);  // 리스트에 플레이어 추가
+                    return $"Room: {updatedRoom.RoomId}. Game started.";
+                }
+                return $"Player {playerToken} accept to start game: {updatedRoom.RoomId}.";
             }
             catch (Exception ex)
             {
@@ -127,9 +142,11 @@ namespace MatchingClient.Services
                 throw new Exception($"Error while waiting for the match: {ex.Message}");
             }
         }
-        private async Task<string> WaitForAccept(string playerToken, CancellationToken cancellationToken)
+        public async Task<string> WaitForAccept(string playerToken, CancellationToken cancellationToken)
         {
-            try{
+            try
+            {
+                int count = 0;
                 while (!cancellationToken.IsCancellationRequested)
                 {
                     Room? room = await _redisCacheManager.GetRoomByPlayerIdAsync(playerToken);
@@ -137,20 +154,28 @@ namespace MatchingClient.Services
                     {
                         throw new Exception("Player not found in any room.");
                     }
-                    Console.WriteLine($"Room: {room.Players.Count} players in room {room.RoomId}");
-                    if (room != null && room.Players.Count >= 3)
+                    Console.WriteLine($"Room: {room.AcceptPlayers.Count} players in room {room.RoomId}");
+                    if (room != null && room.AcceptPlayers.Count >= 3)
                     {
                         return "ready to start";
                     }
                     // 필요한 인원이 모이지 않았으면 일정 시간 대기
-                    await Task.Delay(5000, cancellationToken);  // 5초마다 검사
+                    await Task.Delay(2000, cancellationToken);  // 5초마다 검사
+
+                    count++;
+                    if (count >= 5)
+                    {
+                        return "Failed to Start.";
+                    }
                 }
                 return "";
-            } catch (OperationCanceledException)
+            }
+            catch (OperationCanceledException)
             {
                 Console.WriteLine("The operation was cancelled.");
                 throw new OperationCanceledException("The operation was cancelled.");
-            } catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 Console.WriteLine($"Error while waiting for the match: {ex.Message}");
                 throw new Exception($"Error while waiting for the match: {ex.Message}");

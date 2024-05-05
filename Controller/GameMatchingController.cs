@@ -17,7 +17,7 @@ namespace MatchingClient.Controllers
             _roomMatchManager = roomMatchManager;
         }
 
-        [HttpPost("request-match")]
+        [HttpPost("match")]
         public async Task<IActionResult> MatchPlayers([FromBody] PlayerToken player_token)
         {
             Console.WriteLine($"Matching player with token: {player_token.Player_Token}");
@@ -37,7 +37,7 @@ namespace MatchingClient.Controllers
             }
         }
 
-        [HttpPost("status")]
+        [HttpPost("match-wait")]
         public async Task<IActionResult> WaitForMatch([FromBody] PlayerToken player_token, CancellationToken cancellationToken)
         {
             Console.WriteLine($"Waiting for a match for player with token: {player_token.Player_Token}");
@@ -69,21 +69,46 @@ namespace MatchingClient.Controllers
                 return StatusCode(500, "Internal server error while waiting for match.");
             }
         }
-        [HttpPost("start-game")]
-        public async Task<IActionResult> StartGame([FromBody] PlayerToken player_token, CancellationToken cancellationToken)
+        [HttpPost("agree")]
+        public async Task<IActionResult> AcceptStartGame([FromBody] PlayerToken player_token)
         {
-            Console.WriteLine($"Starting game for player with token: {player_token.Player_Token}");
-            if (string.IsNullOrEmpty(player_token.Player_Token))
+            try
             {
-                return BadRequest("Player token is required.");
+                Console.WriteLine($"Accept game for player with token: {player_token.Player_Token}");
+                if (string.IsNullOrEmpty(player_token.Player_Token))
+                {
+                    return BadRequest("Player token is required.");
+                }
+                
+                var AcceptMsg = await _roomMatchManager.AcceptMatch(player_token.Player_Token);
+                Console.WriteLine("AcceptMsg: " + AcceptMsg);
+                return Ok();
             }
-            
-            // TODO: Implement game start logic here
-            var matchFound = await _roomMatchManager.WaitForMatch(player_token.Player_Token, cancellationToken);
-            // Simulate long polling by waiting for a certain period of time
-            await Task.Delay(TimeSpan.FromSeconds(30), cancellationToken);
-            
-            return Ok(matchFound);
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error while accepting game: {ex.Message}");
+                return StatusCode(500, "Internal server error while accepting game.");
+            }
+        }
+
+        [HttpPost("agree-wait")]
+        public async Task<IActionResult> WaitAcceptStartGame([FromBody] PlayerToken player_token, CancellationToken cancellationToken)
+        {
+            try
+            {
+                Console.WriteLine($"Wait for Accept otherPlayers : {player_token.Player_Token}");
+                if (string.IsNullOrEmpty(player_token.Player_Token))
+                {
+                    return BadRequest("Player token is required.");
+                }
+                var waitMsg = await _roomMatchManager.WaitForAccept(player_token.Player_Token, cancellationToken);
+                return Ok(waitMsg);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error while waiting for accept: {ex.Message}");
+                return StatusCode(500, "Internal server error while waiting for accept.");
+            }
         }
     }
 }
