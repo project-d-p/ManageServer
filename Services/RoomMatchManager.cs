@@ -142,7 +142,7 @@ namespace MatchingClient.Services
                 throw new Exception($"Error while waiting for the match: {ex.Message}");
             }
         }
-        public async Task<string> WaitForAccept(string playerToken, CancellationToken cancellationToken)
+        public async Task<Room?> WaitForAccept(string playerToken, CancellationToken cancellationToken)
         {
             try
             {
@@ -157,7 +157,7 @@ namespace MatchingClient.Services
                     Console.WriteLine($"Room: {room.AcceptPlayers.Count} players in room {room.RoomId}");
                     if (room != null && room.AcceptPlayers.Count >= 3)
                     {
-                        return "ready to start";
+                        return room;
                     }
                     // 필요한 인원이 모이지 않았으면 일정 시간 대기
                     await Task.Delay(2000, cancellationToken);  // 5초마다 검사
@@ -165,10 +165,10 @@ namespace MatchingClient.Services
                     count++;
                     if (count >= 5)
                     {
-                        return "Failed to Start.";
+                        return null;
                     }
                 }
-                return "";
+                return null;
             }
             catch (OperationCanceledException)
             {

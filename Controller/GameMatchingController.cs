@@ -101,8 +101,8 @@ namespace MatchingClient.Controllers
                 {
                     return BadRequest("Player token is required.");
                 }
-                var waitMsg = await _roomMatchManager.WaitForAccept(player_token.Player_Token, cancellationToken);
-                return Ok(waitMsg);
+                var roomInfo = await _roomMatchManager.WaitForAccept(player_token.Player_Token, cancellationToken);
+                return Ok(roomInfo);
             }
             catch (Exception ex)
             {
