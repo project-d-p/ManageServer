@@ -167,10 +167,10 @@ namespace MatchingClient.Services
                         return room;
                     }
                     // 필요한 인원이 모이지 않았으면 일정 시간 대기
-                    await Task.Delay(2000, cancellationToken);  // 5초마다 검사
+                    await Task.Delay(1000, cancellationToken);  // 1초마다 검사
 
                     count++;
-                    if (room != null && count >= 5)
+                    if (room != null && count >= 15)
                     {
                         Room? updateRoom = await _redisCacheManager.GetRoomByPlayerIdAsync(playerToken);
                         if (updateRoom == null)
