@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "/Users/joupark/DirForClone/testGameServer/MatchingClient/MatchingClient.csproj": {}
+    "/Users/joupark/DirForClone/ManageServer/MatchingClient.csproj": {}
   },
   "projects": {
-    "/Users/joupark/DirForClone/testGameServer/MatchingClient/MatchingClient.csproj": {
+    "/Users/joupark/DirForClone/ManageServer/MatchingClient.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/Users/joupark/DirForClone/testGameServer/MatchingClient/MatchingClient.csproj",
+        "projectUniqueName": "/Users/joupark/DirForClone/ManageServer/MatchingClient.csproj",
         "projectName": "MatchingClient",
-        "projectPath": "/Users/joupark/DirForClone/testGameServer/MatchingClient/MatchingClient.csproj",
+        "projectPath": "/Users/joupark/DirForClone/ManageServer/MatchingClient.csproj",
         "packagesPath": "/Users/joupark/.nuget/packages/",
-        "outputPath": "/Users/joupark/DirForClone/testGameServer/MatchingClient/obj/",
+        "outputPath": "/Users/joupark/DirForClone/ManageServer/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "/Users/joupark/.nuget/NuGet/NuGet.Config"
@@ -47,6 +47,10 @@
               "target": "Package",
               "version": "[3.26.1, )"
             },
+            "Grpc.AspNetCore": {
+              "target": "Package",
+              "version": "[2.62.0, )"
+            },
             "Grpc.Net.Client": {
               "target": "Package",
               "version": "[2.62.0, )"
@@ -60,6 +64,10 @@
             "Microsoft.AspNetCore.Hosting": {
               "target": "Package",
               "version": "[2.2.7, )"
+            },
+            "StackExchange.Redis": {
+              "target": "Package",
+              "version": "[2.7.33, )"
             }
           },
           "imports": [

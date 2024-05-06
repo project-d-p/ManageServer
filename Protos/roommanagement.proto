@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package roommanagement;
+
+// 서비스 정의
+service RoomManagementService {
+  // Room 정보를 리셋하고 결과를 반환
+  rpc ResetRoom (ResetRoomRequest) returns (ResetRoomResponse);
+}
+
+// Room 리셋 요청 메시지
+message ResetRoomRequest {
+  string roomId = 1; // 처리할 Room ID
+}
+
+// Room 리셋 응답 메시지
+message ResetRoomResponse {
+  bool success = 1; // 처리 성공 여부
+}

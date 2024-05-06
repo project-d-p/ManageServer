@@ -9,6 +9,7 @@
 
   <ItemGroup>
     <Protobuf Include="Protos/matching.proto" GrpcServices="Client" />
+    <Protobuf Include="Protos/roommanagement.proto" GrpcServices="Server" />
   </ItemGroup>
 
   <ItemGroup>
@@ -17,12 +18,14 @@
 
   <ItemGroup>
     <PackageReference Include="Google.Protobuf" Version="3.26.1" />
+    <PackageReference Include="Grpc.AspNetCore" Version="2.62.0" />
     <PackageReference Include="Grpc.Net.Client" Version="2.62.0" />
     <PackageReference Include="Grpc.Tools" Version="2.62.0">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.AspNetCore.Hosting" Version="2.2.7" />
+    <PackageReference Include="StackExchange.Redis" Version="2.7.33" />
   </ItemGroup>
 
 </Project>

@@ -1,0 +1,2 @@
+obj/Debug/net8.0/Protos/Roommanagement.cs \
+obj/Debug/net8.0/Protos/RoommanagementGrpc.cs: Protos/roommanagement.proto
