@@ -72,6 +72,10 @@ namespace MatchingClient.Services
                         string playersJson = entry.Value.HasValue ? entry.Value.ToString() : "[]";
                         room.Players = JsonSerializer.Deserialize<List<string>>(playersJson) ?? new List<string>();
                         break;
+                    case "accept_players":
+                        string acceptPlayersJson = entry.Value.HasValue ? entry.Value.ToString() : "[]";
+                        room.AcceptPlayers = JsonSerializer.Deserialize<List<string>>(acceptPlayersJson) ?? new List<string>();
+                        break;
                     case "active":
                         if (entry.Value.HasValue)
                             room.IsActive = bool.TryParse(entry.Value, out bool isActive);

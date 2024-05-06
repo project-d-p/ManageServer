@@ -102,6 +102,10 @@ namespace MatchingClient.Controllers
                     return BadRequest("Player token is required.");
                 }
                 var roomInfo = await _roomMatchManager.WaitForAccept(player_token.Player_Token, cancellationToken);
+                if (roomInfo == null)
+                {
+                    return NotFound("fail to GameStart.");
+                }
                 return Ok(roomInfo);
             }
             catch (Exception ex)

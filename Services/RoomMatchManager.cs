@@ -118,6 +118,7 @@ namespace MatchingClient.Services
         {
             try
             {
+                //이미 게임을 허락한 유저에 대한 예외처리 필요
                 Room? room = await _redisCacheManager.GetRoomByPlayerIdAsync(playerToken);
                 if (room == null)
                 {
@@ -126,12 +127,18 @@ namespace MatchingClient.Services
                 Room updatedRoom = await _redisCacheManager.AddPlayerToFieldAsync(room.RoomId, playerToken, "accept_players", true);
                 if (updatedRoom.AcceptPlayers.Count >= 3)
                 {
+                    Console.WriteLine($"Room: {updatedRoom.RoomId} is full. Game started.");
                     // 게임 시작
+                    if (updatedRoom.RoomId == null)
+                    {
+                        throw new Exception("Error getting room ID.");
+                    }
                     var requestLaunch = new Matching.RequestLaunch
                     {
-                        ChannelId = updatedRoom.RoomId
+                        ChannelId = updatedRoom.RoomId.Replace("room:", "")
                     };
                     requestLaunch.PlayerToken.AddRange(updatedRoom.AcceptPlayers);  // 리스트에 플레이어 추가
+                    await _grpcClient.AttachPlayerAsync(requestLaunch);
                     return $"Room: {updatedRoom.RoomId}. Game started.";
                 }
                 return $"Player {playerToken} accept to start game: {updatedRoom.RoomId}.";
