@@ -1,9 +1,10 @@
 {
   "version": 2,
-  "dgSpecHash": "1VIsUAyDRYXiEoK/Jz0lr1f/B4rXuyafeQ/OyxPgI1xS09Ju3zU6J2BvjkzNl+UyDuA2lzl2DKIt7UxYyjT7Tw==",
+  "dgSpecHash": "2IsZDyWDrsJ0fji+xnRueZ9wfctQl0WdDOcqjotE+YJC6/UFGYWyZL5UPvtUZf1YhizefSwJwtiCtJ8nZrChUg==",
   "success": true,
   "projectFilePath": "/Users/joupark/DirForClone/ManageServer/MatchingClient.csproj",
   "expectedPackageFiles": [
+    "/Users/joupark/.nuget/packages/aspnetcoreratelimit/5.0.0/aspnetcoreratelimit.5.0.0.nupkg.sha512",
     "/Users/joupark/.nuget/packages/google.protobuf/3.26.1/google.protobuf.3.26.1.nupkg.sha512",
     "/Users/joupark/.nuget/packages/grpc.aspnetcore/2.62.0/grpc.aspnetcore.2.62.0.nupkg.sha512",
     "/Users/joupark/.nuget/packages/grpc.aspnetcore.server/2.62.0/grpc.aspnetcore.server.2.62.0.nupkg.sha512",
@@ -59,6 +60,7 @@
     "/Users/joupark/.nuget/packages/microsoft.extensions.primitives/8.0.0/microsoft.extensions.primitives.8.0.0.nupkg.sha512",
     "/Users/joupark/.nuget/packages/microsoft.net.http.headers/2.2.0/microsoft.net.http.headers.2.2.0.nupkg.sha512",
     "/Users/joupark/.nuget/packages/mono.texttemplating/2.2.1/mono.texttemplating.2.2.1.nupkg.sha512",
+    "/Users/joupark/.nuget/packages/newtonsoft.json/13.0.2/newtonsoft.json.13.0.2.nupkg.sha512",
     "/Users/joupark/.nuget/packages/pipelines.sockets.unofficial/2.2.8/pipelines.sockets.unofficial.2.2.8.nupkg.sha512",
     "/Users/joupark/.nuget/packages/sqlitepclraw.bundle_e_sqlite3/2.1.6/sqlitepclraw.bundle_e_sqlite3.2.1.6.nupkg.sha512",
     "/Users/joupark/.nuget/packages/sqlitepclraw.core/2.1.6/sqlitepclraw.core.2.1.6.nupkg.sha512",

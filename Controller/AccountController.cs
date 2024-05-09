@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using ManageServer.Models;
 using ManageServer.Data;
-using MatchingClient.Services;
+using System.Text.RegularExpressions;
 
 namespace MatchingClient.Controllers
 {
@@ -24,28 +24,33 @@ namespace MatchingClient.Controllers
                 return BadRequest("Invalid login ID or password.");
             }
 
+            // LoginId 중복 확인
+            var existingUser = _context.Users.FirstOrDefault(u => u.LoginId == user.LoginId);
+            if (existingUser != null)
+            {
+                return BadRequest("Login ID already exists.");
+            }
+
             user.Password = HashingHelper.HashPassword(user.Password);
             _context.Users.Add(user);
             try
             {
                 _context.SaveChanges();
-                Console.WriteLine($"User registered successfully: {user.LoginId}");
+                return Ok(new { message = "User registered successfully!" });
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error registering user: {ex.Message}");
-                return BadRequest("Error registering user");
+                return BadRequest("Error registering user: " + ex.Message);
             }
-
-            var users = _context.Users.ToList();
-            return Ok(new { message = "User registered successfully!", AllUsers = users });
         }
 
         [HttpPost("login")]
         public ActionResult Login([FromBody] User loginUser)
         {
             var user = _context.Users.FirstOrDefault(u => u.LoginId == loginUser.LoginId);
-            if (user == null || string.IsNullOrEmpty(user.Password) || string.IsNullOrEmpty(loginUser.Password))
+
+            // User 데이터가 null이거나 Login ID 또는 Password가 비어있는지 확인
+            if (user == null || string.IsNullOrEmpty(user.LoginId) || string.IsNullOrEmpty(user.Password) || string.IsNullOrEmpty(loginUser.Password))
             {
                 return NotFound(new { message = "User not found." });
             }
@@ -56,6 +61,21 @@ namespace MatchingClient.Controllers
             }
 
             return Ok(new { message = "Login successful.", UserId = user.Id });
+        }
+
+        private bool IsValidLoginId(string loginId)
+        {
+            return !string.IsNullOrEmpty(loginId) && loginId.Length >= 8 && loginId.Length <= 30;
+        }
+
+        private bool IsValidPassword(string password)
+        {
+            if (string.IsNullOrEmpty(password) || password.Length < 8 || password.Length > 30)
+                return false;
+
+            // 비밀번호 복잡성 확인: 대문자, 소문자, 숫자, 특수 문자 포함
+            var passwordPattern = @"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W]).{8,30}$";
+            return Regex.IsMatch(password, passwordPattern);
         }
     }
 }

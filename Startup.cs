@@ -8,11 +8,33 @@ using StackExchange.Redis;
 using Grpc.Net.Client;
 using Roommanagement;
 using ManageServer.Data;
+using AspNetCoreRateLimit;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration; // Add this line
 
 public class Startup
 {
+    public IConfiguration Configuration { get; } // Configuration 프로퍼티 추가
+
+    public Startup(IConfiguration configuration) // 생성자에서 IConfiguration 주입
+    {
+        Configuration = configuration;
+    }
+
     public void ConfigureServices(IServiceCollection services)
-    {  
+    {
+        // Rate limit services
+        services.AddMemoryCache();
+
+        services.Configure<IpRateLimitOptions>(Configuration.GetSection("IpRateLimiting"));
+        services.AddSingleton<IIpPolicyStore, MemoryCacheIpPolicyStore>();
+        services.AddSingleton<IRateLimitCounterStore, MemoryCacheRateLimitCounterStore>();
+        services.AddSingleton<IRateLimitConfiguration, RateLimitConfiguration>();
+        services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+        services.AddInMemoryRateLimiting();
+
+        services.AddControllers();
+
         // Enable controllers for the web API
         services.AddControllers();
         // gRPC server service
@@ -52,7 +74,9 @@ public class Startup
             app.UseDeveloperExceptionPage();
         }
 
+        app.UseIpRateLimiting();
         app.UseRouting();
+        app.UseAuthorization();
         app.UseEndpoints(endpoints =>
         {
             endpoints.MapControllers();  // Map controller routes
