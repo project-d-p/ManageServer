@@ -24,11 +24,16 @@ namespace MatchingClient.Controllers
                 return BadRequest("Invalid login ID or password.");
             }
 
+            if (!IsValidLoginId(user.LoginId) || !IsValidPassword(user.Password))
+            {
+                return BadRequest("Invalid login ID or password.");
+            }
+
             // LoginId 중복 확인
             var existingUser = _context.Users.FirstOrDefault(u => u.LoginId == user.LoginId);
             if (existingUser != null)
             {
-                return BadRequest("Login ID already exists.");
+                return Conflict("Login ID already exists.");
             }
 
             user.Password = HashingHelper.HashPassword(user.Password);
@@ -36,7 +41,7 @@ namespace MatchingClient.Controllers
             try
             {
                 _context.SaveChanges();
-                return Ok(new { message = "User registered successfully!" });
+                return StatusCode(201, new { message = "User registered successfully!" });
             }
             catch (Exception ex)
             {
@@ -55,9 +60,14 @@ namespace MatchingClient.Controllers
                 return NotFound(new { message = "User not found." });
             }
 
+            if (!IsValidLoginId(user.LoginId) || !IsValidPassword(user.Password))
+            {
+                return BadRequest("Invalid login ID or password.");
+            }
+
             if (!HashingHelper.VerifyPassword(user.Password, loginUser.Password))
             {
-                return BadRequest(new { message = "Invalid password." });
+                return Unauthorized(new { message = "Invalid password." });
             }
 
             return Ok(new { message = "Login successful.", UserId = user.Id });
