@@ -3,9 +3,11 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.EntityFrameworkCore;
 using StackExchange.Redis;
 using Grpc.Net.Client;
 using Roommanagement;
+using ManageServer.Data;
 
 public class Startup
 {
@@ -24,6 +26,10 @@ public class Startup
             return multiplexer;
         });
         services.AddSingleton<IRedisCacheManager, RedisCacheManager>();
+        
+        // Register the database context
+        services.AddDbContext<ApplicationDbContext>(options =>
+        options.UseSqlite("Data Source=Registration.db"));
         
         // GrpcGameServerClient registration
         services.AddSingleton<GrpcGameServerClient>(provider =>
