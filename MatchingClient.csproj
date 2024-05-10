@@ -10,6 +10,7 @@
   <ItemGroup>
     <Protobuf Include="Protos/matching.proto" GrpcServices="Client" />
     <Protobuf Include="Protos/roommanagement.proto" GrpcServices="Server" />
+    <Protobuf Include="Protos/gameEnd.proto" GrpcServices="Server" />
   </ItemGroup>
 
   <ItemGroup>

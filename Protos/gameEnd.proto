@@ -1,0 +1,44 @@
+syntax = "proto3";
+
+package gameEnd;
+
+// 서비스 정의
+service GameResultService {
+  // 게임 요약 정보를 요청하는 메서드
+  rpc GetGameSummary(GameSummaryRequest) returns (GameSummaryResponse) {}
+}
+
+// 플레이어의 순위를 나타내는 Enum 타입 정의
+enum PlayerRank {
+  FIRST = 0;
+  SECOND = 1;
+  THIRD = 2;
+  FOURTH = 3;
+  OTHER = 4;  // 4등 이하를 표현
+}
+
+// 게임 플레이어의 직업을 나타내는 Enum 타입 정의
+enum PlayerRole {
+  Job1 = 0;
+  Job2 = 1;
+  Job3 = 2;
+}
+
+// 개별 플레이어의 게임 결과를 담는 메시지
+message PlayerSummary {
+  string UserId = 1;          // 플레이어 ID
+  PlayerRank rank = 2;          // 플레이어의 등수
+  int32 totalScore = 3;         // 플레이어의 총 점수
+  int32 capturedNum = 4;      // 잡은 동물의 수
+  PlayerRole role = 5;          // 플레이어의 직업
+}
+
+// 게임 종료 후의 전체 상세 결과를 담는 메시지
+message GameSummaryRequest {
+    string RoomId = 1; // 게임 RoomId
+    repeated PlayerSummary Players = 2; // 모든 플레이어의 결과 데이터
+}
+
+message GameSummaryResponse {
+    bool success = 1; //처리 성공 여부
+}

@@ -10,6 +10,7 @@ namespace ManageServer.Data
         { }
 
         public DbSet<User> Users { get; set; }
+        public DbSet<PlayerRecord> PlayerRecords { get; set; } // PlayerRecord 테이블 추가
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -19,6 +20,12 @@ namespace ManageServer.Data
             modelBuilder.Entity<User>()
                 .HasIndex(u => u.LoginId)
                 .IsUnique();
+
+            // PlayerRecord와 User의 관계 설정
+            modelBuilder.Entity<PlayerRecord>()
+                .HasOne(p => p.User)
+                .WithMany()
+                .HasForeignKey(p => p.UserId);
         }
     }
 }
