@@ -28,7 +28,7 @@ namespace GameEnd {
             "bWFyeRIOCgZVc2VySWQYASABKAkSIQoEcmFuaxgCIAEoDjITLmdhbWVFbmQu",
             "UGxheWVyUmFuaxISCgp0b3RhbFNjb3JlGAMgASgFEhMKC2NhcHR1cmVkTnVt",
             "GAQgASgFEiEKBHJvbGUYBSABKA4yEy5nYW1lRW5kLlBsYXllclJvbGUiTQoS",
-            "R2FtZVN1bW1hcnlSZXF1ZXN0Eg4KBlJvb21JZBgBIAEoCRInCgdwbGF5ZXJz",
+            "R2FtZVN1bW1hcnlSZXF1ZXN0Eg4KBlJvb21JZBgBIAEoCRInCgdQbGF5ZXJz",
             "GAIgAygLMhYuZ2FtZUVuZC5QbGF5ZXJTdW1tYXJ5IiYKE0dhbWVTdW1tYXJ5",
             "UmVzcG9uc2USDwoHc3VjY2VzcxgBIAEoCCpFCgpQbGF5ZXJSYW5rEgkKBUZJ",
             "UlNUEAASCgoGU0VDT05EEAESCQoFVEhJUkQQAhIKCgZGT1VSVEgQAxIJCgVP",
@@ -494,7 +494,7 @@ namespace GameEnd {
       }
     }
 
-    /// <summary>Field number for the "players" field.</summary>
+    /// <summary>Field number for the "Players" field.</summary>
     public const int PlayersFieldNumber = 2;
     private static readonly pb::FieldCodec<global::GameEnd.PlayerSummary> _repeated_players_codec
         = pb::FieldCodec.ForMessage(18, global::GameEnd.PlayerSummary.Parser);

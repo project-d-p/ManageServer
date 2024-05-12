@@ -11,6 +11,7 @@ using ManageServer.Data;
 using AspNetCoreRateLimit;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration; // Add this line
+using GameEnd;
 
 public class Startup
 {
@@ -65,6 +66,7 @@ public class Startup
         });
         services.AddScoped<RoomMatchManager>();
         services.AddSingleton<RoomManagementService.RoomManagementServiceBase, RoomManagementServiceImpl>();
+        services.AddScoped<GameResultService.GameResultServiceBase, GameResultServiceImpl>();
     }
 
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -81,6 +83,7 @@ public class Startup
         {
             endpoints.MapControllers();  // Map controller routes
             endpoints.MapGrpcService<RoomManagementServiceImpl>();
+            endpoints.MapGrpcService<GameResultServiceImpl>();
         });
     }
 }
