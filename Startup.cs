@@ -67,6 +67,22 @@ public class Startup
         services.AddScoped<RoomMatchManager>();
         services.AddSingleton<RoomManagementService.RoomManagementServiceBase, RoomManagementServiceImpl>();
         services.AddScoped<GameResultService.GameResultServiceBase, GameResultServiceImpl>();
+
+        services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+        .AddJwtBearer(options =>
+        {
+            options.TokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateIssuer = true,
+                ValidateAudience = true,
+                ValidateLifetime = true,
+                ValidateIssuerSigningKey = true,
+                ValidIssuer = "ManageServer",
+                ValidAudience = "ClientApp",
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("")),
+                ClockSkew = TimeSpan.Zero
+            };
+        });
     }
 
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

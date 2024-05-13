@@ -1,2 +1,5 @@
 # 데이터베이스 파일
 *.db
+
+# settings file 
+appsettings.json
