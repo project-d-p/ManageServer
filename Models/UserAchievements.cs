@@ -12,7 +12,7 @@ namespace ManageServer.Models
         [ForeignKey("User")]
         public int UserId { get; set; }  // User 테이블의 외래 키
 
-        public User User { get; set; }  // 관련 User 엔티티
+        public User? User { get; set; }  // 관련 User 엔티티
 
         [Required]
         public int TotalGamesPlayed { get; set; }  // 지금까지 총 게임 횟수

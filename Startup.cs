@@ -12,6 +12,7 @@ using AspNetCoreRateLimit;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration; // Add this line
 using GameEnd;
+using ManageServer.Models;
 
 public class Startup
 {
@@ -24,6 +25,9 @@ public class Startup
 
     public void ConfigureServices(IServiceCollection services)
     {
+        var customInfo = new CustomInfo();
+        Configuration.GetSection("CustomInfo").Bind(customInfo);
+
         // Rate limit services
         services.AddMemoryCache();
 
@@ -44,7 +48,10 @@ public class Startup
         // Register radis connection and game room manager
         services.AddSingleton<IConnectionMultiplexer>(provider =>
         {
-            var configuration = ConfigurationOptions.Parse("localhost:6379");
+            var configuration = ConfigurationOptions.Parse(
+                customInfo.RedisSettings?.ConnectionString != null 
+                ? customInfo.RedisSettings.ConnectionString
+                : "localhost:6379");
             var multiplexer = ConnectionMultiplexer.Connect(configuration);
             return multiplexer;
         });
@@ -61,28 +68,16 @@ public class Startup
             httpHandler.ServerCertificateCustomValidationCallback = 
                 HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
             
-            var channel = GrpcChannel.ForAddress("https://localhost:5255", new GrpcChannelOptions { HttpHandler = httpHandler });
+            var channel = GrpcChannel.ForAddress(
+                customInfo.GrpcSettings?.ServerIP != null
+                ? customInfo.GrpcSettings.ServerIP
+                : "localhost:5255",
+                new GrpcChannelOptions { HttpHandler = httpHandler });
             return new GrpcGameServerClient(channel);
         });
         services.AddScoped<RoomMatchManager>();
         services.AddSingleton<RoomManagementService.RoomManagementServiceBase, RoomManagementServiceImpl>();
         services.AddScoped<GameResultService.GameResultServiceBase, GameResultServiceImpl>();
-
-        services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-        .AddJwtBearer(options =>
-        {
-            options.TokenValidationParameters = new TokenValidationParameters
-            {
-                ValidateIssuer = true,
-                ValidateAudience = true,
-                ValidateLifetime = true,
-                ValidateIssuerSigningKey = true,
-                ValidIssuer = "ManageServer",
-                ValidAudience = "ClientApp",
-                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("")),
-                ClockSkew = TimeSpan.Zero
-            };
-        });
     }
 
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
