@@ -25,8 +25,10 @@ public class Startup
 
     public void ConfigureServices(IServiceCollection services)
     {
+        // CustomInfo configuration
         var customInfo = new CustomInfo();
         Configuration.GetSection("CustomInfo").Bind(customInfo);
+        services.AddSingleton(customInfo);
 
         // Rate limit services
         services.AddMemoryCache();
