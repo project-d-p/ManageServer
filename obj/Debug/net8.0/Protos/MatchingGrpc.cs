@@ -70,6 +70,14 @@ namespace Matching {
         __Marshaller_matching_RequestLaunch,
         __Marshaller_matching_ResponseLaunch);
 
+    [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+    static readonly grpc::Method<global::Matching.RequestLaunch, global::Matching.ChannelResponse> __Method_ReplayMatch = new grpc::Method<global::Matching.RequestLaunch, global::Matching.ChannelResponse>(
+        grpc::MethodType.Unary,
+        __ServiceName,
+        "ReplayMatch",
+        __Marshaller_matching_RequestLaunch,
+        __Marshaller_matching_ChannelResponse);
+
     /// <summary>Service descriptor</summary>
     public static global::Google.Protobuf.Reflection.ServiceDescriptor Descriptor
     {
@@ -142,6 +150,54 @@ namespace Matching {
       public virtual grpc::AsyncUnaryCall<global::Matching.ResponseLaunch> AttachPlayerAsync(global::Matching.RequestLaunch request, grpc::CallOptions options)
       {
         return CallInvoker.AsyncUnaryCall(__Method_AttachPlayer, null, options, request);
+      }
+      /// <summary>
+      /// New RPC method
+      /// </summary>
+      /// <param name="request">The request to send to the server.</param>
+      /// <param name="headers">The initial metadata to send with the call. This parameter is optional.</param>
+      /// <param name="deadline">An optional deadline for the call. The call will be cancelled if deadline is hit.</param>
+      /// <param name="cancellationToken">An optional token for canceling the call.</param>
+      /// <returns>The response received from the server.</returns>
+      [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+      public virtual global::Matching.ChannelResponse ReplayMatch(global::Matching.RequestLaunch request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
+      {
+        return ReplayMatch(request, new grpc::CallOptions(headers, deadline, cancellationToken));
+      }
+      /// <summary>
+      /// New RPC method
+      /// </summary>
+      /// <param name="request">The request to send to the server.</param>
+      /// <param name="options">The options for the call.</param>
+      /// <returns>The response received from the server.</returns>
+      [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+      public virtual global::Matching.ChannelResponse ReplayMatch(global::Matching.RequestLaunch request, grpc::CallOptions options)
+      {
+        return CallInvoker.BlockingUnaryCall(__Method_ReplayMatch, null, options, request);
+      }
+      /// <summary>
+      /// New RPC method
+      /// </summary>
+      /// <param name="request">The request to send to the server.</param>
+      /// <param name="headers">The initial metadata to send with the call. This parameter is optional.</param>
+      /// <param name="deadline">An optional deadline for the call. The call will be cancelled if deadline is hit.</param>
+      /// <param name="cancellationToken">An optional token for canceling the call.</param>
+      /// <returns>The call object.</returns>
+      [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+      public virtual grpc::AsyncUnaryCall<global::Matching.ChannelResponse> ReplayMatchAsync(global::Matching.RequestLaunch request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
+      {
+        return ReplayMatchAsync(request, new grpc::CallOptions(headers, deadline, cancellationToken));
+      }
+      /// <summary>
+      /// New RPC method
+      /// </summary>
+      /// <param name="request">The request to send to the server.</param>
+      /// <param name="options">The options for the call.</param>
+      /// <returns>The call object.</returns>
+      [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+      public virtual grpc::AsyncUnaryCall<global::Matching.ChannelResponse> ReplayMatchAsync(global::Matching.RequestLaunch request, grpc::CallOptions options)
+      {
+        return CallInvoker.AsyncUnaryCall(__Method_ReplayMatch, null, options, request);
       }
       /// <summary>Creates a new instance of client from given <c>ClientBaseConfiguration</c>.</summary>
       [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]

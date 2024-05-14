@@ -94,7 +94,7 @@ namespace MatchingClient.Services
                         throw new Exception("Player not found in any room.");
                     }
                     Console.WriteLine($"Room: {room.Players.Count} players in room {room.RoomId}");
-                    if (room != null && room.Players.Count >= 3)
+                    if (room != null && room.Players.Count >= 4)
                     {
                         return "ready to start";
                     }
@@ -125,7 +125,7 @@ namespace MatchingClient.Services
                     throw new Exception("Player not found in any room.");
                 }
                 Room updatedRoom = await _redisCacheManager.AddPlayerToFieldAsync(room.RoomId, playerToken, "accept_players", true);
-                if (updatedRoom.AcceptPlayers.Count >= 3)
+                if (updatedRoom.AcceptPlayers.Count >= 4)
                 {
                     Console.WriteLine($"Room: {updatedRoom.RoomId} is full. Game started.");
                     // 게임 시작
@@ -162,7 +162,7 @@ namespace MatchingClient.Services
                         throw new Exception("Player not found in any room.");
                     }
                     Console.WriteLine($"Room: {room.AcceptPlayers.Count} players in room {room.RoomId}");
-                    if (room != null && room.AcceptPlayers.Count >= 3)
+                    if (room != null && room.AcceptPlayers.Count >= 4)
                     {
                         return room;
                     }
@@ -204,7 +204,7 @@ namespace MatchingClient.Services
                 Room updatedRoom = await _redisCacheManager.AddPlayerToFieldAsync(roomId, playerToken, "players", false);
                 
                 // 방이 가득 찼는지 확인
-                if (updatedRoom.Players.Count >= 3)
+                if (updatedRoom.Players.Count >= 4)
                 {
                     // 게임 시작
                     var requestLaunch = new Matching.RequestLaunch
@@ -240,6 +240,83 @@ namespace MatchingClient.Services
             catch (Exception ex)
             {
                 throw new Exception($"Error creating new room and adding player: {ex.Message}");
+            }
+        }
+        public async Task<string> AcceptReMatch(string roomId, string playerToken)
+        {
+            try
+            {
+                Room updatedRoom = await _redisCacheManager.AddPlayerToFieldAsync(roomId, playerToken, "players", true);
+                if (updatedRoom.RoomId != null && updatedRoom.Players.Count >= 4)
+                {
+                    var requestLaunch = new Matching.RequestLaunch
+                    {
+                        ChannelId = updatedRoom.RoomId.Replace("room:", "")
+                    };
+                    requestLaunch.PlayerToken.AddRange(updatedRoom.Players);  // 리스트에 플레이어 추가
+                    Room newRoom = await _grpcClient.ReplayMatchAsync(requestLaunch);
+                    newRoom.Players = updatedRoom.Players;
+                    newRoom.AcceptPlayers = updatedRoom.AcceptPlayers;
+                    await _redisCacheManager.CreateRoomAsync(newRoom);
+                    updatedRoom = newRoom;
+                }
+                updatedRoom = await _redisCacheManager.AddPlayerToFieldAsync(roomId, playerToken, "accept_players", true);
+                if (updatedRoom.AcceptPlayers.Count >= 4)
+                {
+                    Console.WriteLine($"Room: {updatedRoom.RoomId} is full. Game started.");
+                    return $"Room: {updatedRoom.RoomId}. Game started.";
+                }
+                return $"Player {playerToken} accept to restart game: {updatedRoom.RoomId}.";
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error while waiting for the match: {ex.Message}");
+                throw new Exception($"Error while waiting for the match: {ex.Message}");
+            }
+        }
+        public async Task<Room?> WaitForAcceptReMatch(string playerToken, CancellationToken cancellationToken)
+        {
+            try
+            {
+                int count = 0;
+                while (!cancellationToken.IsCancellationRequested)
+                {
+                    Room? room = await _redisCacheManager.GetRoomByPlayerIdAsync(playerToken);
+                    if (room == null)
+                    {
+                        throw new Exception("Player not found in any room.");
+                    }
+                    Console.WriteLine($"Room: {room.AcceptPlayers.Count} players in room {room.RoomId}");
+                    if (room != null && room.AcceptPlayers.Count >= 4)
+                    {
+                        return room;
+                    }
+                    // 필요한 인원이 모이지 않았으면 일정 시간 대기
+                    await Task.Delay(1000, cancellationToken);  // 1초마다 검사
+
+                    count++;
+                    if (room != null && count >= 15)
+                    {
+                        Room? updateRoom = await _redisCacheManager.GetRoomByPlayerIdAsync(playerToken);
+                        if (updateRoom == null || updateRoom.RoomId == null)
+                        {
+                            throw new Exception("Player not found in any room.");
+                        }
+                        await _redisCacheManager.ResetRoomAsync(updateRoom.RoomId);
+                        return null;
+                    }
+                }
+                return null;
+            }
+            catch (OperationCanceledException)
+            {
+                Console.WriteLine("The operation was cancelled.");
+                throw new OperationCanceledException("The operation was cancelled.");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error while waiting for the match: {ex.Message}");
+                throw new Exception($"Error while waiting for the match: {ex.Message}");
             }
         }
     }

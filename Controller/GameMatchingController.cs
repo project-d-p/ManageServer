@@ -113,5 +113,53 @@ namespace MatchingClient.Controllers
                 return StatusCode(500, "Internal server error while waiting for accept.");
             }
         }
+
+        [HttpPost("replay")]
+        public async Task<IActionResult> ReMatch([FromBody] ReMatchInfo reMatchInfo)
+        {
+            try
+            {
+                Console.WriteLine($"Replay Request for player with token: {reMatchInfo.Player_Token}");
+                if (string.IsNullOrEmpty(reMatchInfo.Player_Token) || string.IsNullOrEmpty(reMatchInfo.RoomID))
+                {
+                    return BadRequest("User Input not invaild.");
+                }
+                var roomInfo = await _roomMatchManager.AcceptReMatch(reMatchInfo.Player_Token, reMatchInfo.RoomID);
+                if (roomInfo == null)
+                {
+                    return NotFound("fail to GameStart.");
+                }
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error while waiting for accept: {ex.Message}");
+                return StatusCode(500, "Internal server error while waiting for accept.");
+            }
+        }
+
+        [HttpPost("replay-wait")]
+        public async Task<IActionResult> WaitReplayRequest([FromBody] PlayerToken player_token, CancellationToken cancellationToken)
+        {
+            try
+            {
+                Console.WriteLine($"Wait for Replay otherPlayers : {player_token.Player_Token}");
+                if (string.IsNullOrEmpty(player_token.Player_Token))
+                {
+                    return BadRequest("Player token is required.");
+                }
+                var roomInfo = await _roomMatchManager.WaitForAcceptReMatch(player_token.Player_Token, cancellationToken);
+                if (roomInfo == null)
+                {
+                    return NotFound("fail to GameStart.");
+                }
+                return Ok(roomInfo);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error while waiting for accept: {ex.Message}");
+                return StatusCode(500, "Internal server error while waiting for accept.");
+            }
+        }
     }
 }

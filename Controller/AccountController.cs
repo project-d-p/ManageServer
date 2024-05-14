@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using ManageServer.Models;
 using ManageServer.Data;
 using System.Text.RegularExpressions;
+using System.Security.Cryptography;
 
 namespace MatchingClient.Controllers
 {
@@ -17,35 +18,42 @@ namespace MatchingClient.Controllers
         }
 
         [HttpPost("register")]
-        public ActionResult Register(User user)
+        public ActionResult Register()
         {
-            if (string.IsNullOrEmpty(user.LoginId) || string.IsNullOrEmpty(user.Password))
-            {
-                return BadRequest("Invalid login ID or password.");
-            }
+            string guestLoginId = Guid.NewGuid().ToString();  // UUID를 사용하여 유니크한 Login ID 생성
+            string guestPassword = GenerateSecureRandomPassword();  // 간단한 랜덤 패스워드 생성 함수 호출
 
-            if (!IsValidLoginId(user.LoginId) || !IsValidPassword(user.Password))
-            {
-                return BadRequest("Invalid login ID or password.");
-            }
-
-            // LoginId 중복 확인
-            var existingUser = _context.Users.FirstOrDefault(u => u.LoginId == user.LoginId);
+            // LoginId 중복 확인 (혹시나 발생할 수 있는 충돌을 방지)
+            var existingUser = _context.Users.FirstOrDefault(u => u.LoginId == guestLoginId);
             if (existingUser != null)
             {
-                return Conflict("Login ID already exists.");
+                do
+                {
+                    guestLoginId = Guid.NewGuid().ToString();
+                    existingUser = _context.Users.FirstOrDefault(u => u.LoginId == guestLoginId);
+                }
+                while (existingUser != null);
             }
 
-            user.Password = HashingHelper.HashPassword(user.Password);
+            var user = new User
+            {
+                LoginId = guestLoginId,
+                Password = HashingHelper.HashPassword(guestPassword)  // 비밀번호 해싱
+            };
+
             _context.Users.Add(user);
             try
             {
                 _context.SaveChanges();
-                return StatusCode(201, new { message = "User registered successfully!" });
+                return Ok(new { 
+                    LoginId = guestLoginId, 
+                    Password = guestPassword, 
+                    Message = "Guest user registered successfully!" 
+                });
             }
             catch (Exception ex)
             {
-                return BadRequest("Error registering user: " + ex.Message);
+                return BadRequest("Error registering guest user: " + ex.Message);
             }
         }
 
@@ -60,7 +68,7 @@ namespace MatchingClient.Controllers
                 return NotFound(new { message = "User not found." });
             }
 
-            if (!IsValidLoginId(user.LoginId) || !IsValidPassword(user.Password))
+            if (!IsValidPassword(user.Password))
             {
                 return BadRequest("Invalid login ID or password.");
             }
@@ -73,19 +81,22 @@ namespace MatchingClient.Controllers
             return Ok(new { message = "Login successful.", UserId = user.Id });
         }
 
-        private bool IsValidLoginId(string loginId)
-        {
-            return !string.IsNullOrEmpty(loginId) && loginId.Length >= 8 && loginId.Length <= 30;
-        }
-
         private bool IsValidPassword(string password)
         {
             if (string.IsNullOrEmpty(password) || password.Length < 8 || password.Length > 30)
                 return false;
+            return true;
+        }
 
-            // 비밀번호 복잡성 확인: 대문자, 소문자, 숫자, 특수 문자 포함
-            var passwordPattern = @"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W]).{8,30}$";
-            return Regex.IsMatch(password, passwordPattern);
+        private string GenerateSecureRandomPassword(int length = 12)
+        {
+            const string validChars = "ABCDEFGHJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+            using (var rng = RandomNumberGenerator.Create())
+            {
+                var bytes = new byte[length];
+                rng.GetBytes(bytes); // 무작위 바이트를 배열에 채움
+                return new string(bytes.Select(b => validChars[b % validChars.Length]).ToArray());
+            }
         }
     }
 }

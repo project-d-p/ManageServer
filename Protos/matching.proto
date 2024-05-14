@@ -5,6 +5,7 @@ package matching;
 service MatchingService {
   rpc CreateChannel(Empty) returns (ChannelResponse);
   rpc AttachPlayer(RequestLaunch) returns (ResponseLaunch);
+  rpc ReplayMatch(RequestLaunch) returns (ChannelResponse); // New RPC method
 }
 
 message Empty {

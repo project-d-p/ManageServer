@@ -6,7 +6,7 @@ using MatchingClient.Models;
 using Matching;
 
 namespace MatchingClient.Services
-{   
+{
     public class GrpcGameServerClient
     {
         private readonly GrpcChannel _channel;
@@ -46,12 +46,40 @@ namespace MatchingClient.Services
             }
         }
 
-        public async Task<Matching.ResponseLaunch> AttachPlayerAsync(Matching.RequestLaunch request)
+        public async Task<ResponseLaunch> AttachPlayerAsync(RequestLaunch request)
         {
             try
             {
                 var response = await _client.AttachPlayerAsync(request);
                 return response;
+            }
+            catch (RpcException rpcEx)
+            {
+                Console.WriteLine($"RPC Error: {rpcEx.StatusCode} - {rpcEx.Message}");
+                throw; // Re-throwing can be replaced with more sophisticated error handling
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"An unexpected error occurred: {ex.Message}");
+                throw; // Ensure all exceptions are caught and logged
+            }
+        }
+
+        public async Task<Room> ReplayMatchAsync(RequestLaunch request)
+        {
+            try
+            {
+                Console.WriteLine($"Requesting replay match for room {request.ChannelId}...");
+                var response = await _client.ReplayMatchAsync(request);
+                Room newRoom = new Room
+                {
+                    RoomId = response.ChannelId,
+                    IP = response.UdpIp,
+                    UdpPort = response.UdpPort,
+                    TcpPort = response.TcpPort
+                };
+                Console.WriteLine($"New channel created: {newRoom.RoomId}");
+                return newRoom;
             }
             catch (RpcException rpcEx)
             {
