@@ -246,7 +246,8 @@ namespace MatchingClient.Services
         {
             try
             {
-                Room updatedRoom = await _redisCacheManager.AddPlayerToFieldAsync(roomId, playerToken, "players", true);
+                Console.WriteLine($"Accepting rematch for player: {playerToken} in room: {roomId}");
+                Room updatedRoom = await _redisCacheManager.AddPlayerToFieldAsync("room:" + roomId, playerToken, "players", true);
                 if (updatedRoom.RoomId != null && updatedRoom.Players.Count >= 4)
                 {
                     var requestLaunch = new Matching.RequestLaunch

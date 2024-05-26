@@ -73,7 +73,7 @@ public class Startup
             var channel = GrpcChannel.ForAddress(
                 customInfo.GrpcSettings?.ServerIP != null
                 ? customInfo.GrpcSettings.ServerIP
-                : "localhost:5255",
+                : "https://localhost:5255",
                 new GrpcChannelOptions { HttpHandler = httpHandler });
             return new GrpcGameServerClient(channel);
         });

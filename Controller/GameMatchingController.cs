@@ -27,7 +27,7 @@ namespace MatchingClient.Controllers
             try
             {
                 await _roomMatchManager.MatchPlayerToRoom(player_token.Player_Token);
-                return Ok();
+                return Ok("Player matched successfully.");
             }
             catch (Exception ex)
             {

@@ -37,7 +37,6 @@ namespace MatchingClient.Services
             }
             else
             {
-                // 기존 락 획득 방식 사용
                 bool acquired = await _db.StringSetAsync(lockKey, "locked", expiry, When.NotExists);
                 return acquired;
             }
@@ -161,6 +160,7 @@ namespace MatchingClient.Services
                 throw new Exception("Error accessing Redis cache.", ex);
             }
         }
+        
         public async Task<Room> AddPlayerToFieldAsync(string? roomId, string? playerId, string fieldName, bool waitForLock)
         {
             if (roomId == null || playerId == null)
@@ -168,7 +168,7 @@ namespace MatchingClient.Services
                 throw new ArgumentNullException("roomId or playerId", "Room ID and Player ID must not be null.");
             }
             string lockKey = $"lock:{roomId}";
-            TimeSpan lockTimeout = TimeSpan.FromSeconds(5); // 예: 10초 동안 락 유지
+            TimeSpan lockTimeout = TimeSpan.FromSeconds(5); 
             // 락 획득 시도
             bool lockAcquired = await AcquireLockAsync(lockKey, lockTimeout, waitForLock);
             if (!lockAcquired)
@@ -234,15 +234,28 @@ namespace MatchingClient.Services
         public async Task<bool> ResetRoomAsync(string roomId, string[]? fields = null)
         {
             var roomKey = $"room:{roomId}";
+            var emptyValues = new Dictionary<string, RedisValue>
+            {
+                { "players", "[]" },  // 빈 JSON 배열
+                { "accept_players", "[]" },  // 빈 JSON 배열
+                { "active", "false" },  // false로 설정
+                { "ip", "" },  // 빈 문자열
+                { "udpPort", 0 },  // 0으로 설정
+                { "tcpPort", 0 }   // 0으로 설정
+            };
+
             if (fields == null)
             {
                 var allFields = new RedisValue[] { "players", "accept_players", "active", "ip", "udpPort", "tcpPort" };
                 try
                 {
-                    // 모든 필드를 초기화합니다 (값을 null로 설정)
+                    // 모든 필드를 초기화합니다 (빈 값으로 설정)
                     foreach (var field in allFields)
                     {
-                        await _db.HashSetAsync(roomKey, field, RedisValue.Null);
+                        if (emptyValues.ContainsKey(field))
+                        {
+                            await _db.HashSetAsync(roomKey, field, emptyValues[field]);
+                        }
                     }
                     return true;
                 }
@@ -255,10 +268,13 @@ namespace MatchingClient.Services
             {
                 try
                 {
-                    // 선택한 필드들을 초기화합니다 (값을 null로 설정)
+                    // 선택한 필드들을 초기화합니다 (빈 값으로 설정)
                     foreach (var field in fields)
                     {
-                        await _db.HashSetAsync(roomKey, field, RedisValue.Null);
+                        if (emptyValues.ContainsKey(field))
+                        {
+                            await _db.HashSetAsync(roomKey, field, emptyValues[field]);
+                        }
                     }
                     return true;
                 }
